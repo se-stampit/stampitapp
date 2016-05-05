@@ -1,0 +1,67 @@
+<resources>
+    <declare-styleable name="VerticalView">
+        <attr name="lightblue_50" format="color" />
+    </declare-styleable>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/lightblue100</item>
+        <item name="colorPrimaryDark">@color/lightblue700</item>
+        <item name="colorAccent">@color/lightblueA100</item>
+        
+        <!--
+        <item name="lightblue_50">@color/lightblue50</item>
+        <item name="lightblue_100">@color/lightblue100</item>
+        <item name="lightblue_200">@color/lightblue200</item>
+        <item name="lightblue_300">@color/lightblue300</item>
+        <item name="lightblue_500">@color/lightblue500</item>
+        <item name="lightblue_700">@color/lightblue700</item>
+
+        <item name="lightblue_A100">@color/lightblueA100</item>
+        <item name="lightblue_A200">@color/lightblueA200</item>
+        <item name="lightblue_A400">@color/lightblueA400</item>
+        <item name="lightblue_A700">@color/lightblueA700</item>
+        -->
+    </style>
+
+    <style name="FullScreen" parent="AppTheme">
+        <!--<item name="android:theme">@style/Theme.AppCompat.NoActionBar</item>-->
+        <item name="android:theme">@android:style/Theme.NoTitleBar</item>
+    </style>
+
+    <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
+        <item name="android:background">@color/black_overlay</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="FontHeadline" parent="@android:style/Widget.TextView">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">24sp</item>
+    </style>
+    <style name="FontSubheading" parent="@android:style/Widget.TextView">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+    <style name="FontNormalText" parent="@android:style/Widget.TextView">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+    <style name="FontLegend" parent="@android:style/Widget.TextView">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+    <style name="Button" parent="@android:style/Widget.Button">
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+</resources>
