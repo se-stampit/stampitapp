@@ -29,8 +29,9 @@
             android:background="@drawable/shapecardbottom">
             <LinearLayout
                 android:paddingLeft="5dp"
-                android:paddingTop="5dp"
-                android:layout_width="200dp"
+                android:paddingTop="2dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:orientation="vertical">
                 <TextView
@@ -49,32 +50,40 @@
                     style="@style/FontLegend"/>
             </LinearLayout>
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="right"
                 android:orientation="horizontal">
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
+                    android:gravity="center"
                     android:src="@drawable/stamp" />
                 <TextView
                     android:id="@+id/card_stamps"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
+                    android:layout_marginLeft="10dp"
                     android:textColor="@color/white"
                     android:text="3"
+                    android:gravity="center"
                     style="@style/FontSubheading"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:textColor="@color/white"
                     android:text="/"
+                    android:gravity="center"
                     style="@style/FontSubheading"/>
                 <TextView
                     android:id="@+id/card_totalStamps"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
+                    android:gravity="center"
                     android:textColor="@color/white"
                     android:text="10"
+                    android:layout_marginRight="10dp"
                     style="@style/FontSubheading"/>
             </LinearLayout>
         </LinearLayout>

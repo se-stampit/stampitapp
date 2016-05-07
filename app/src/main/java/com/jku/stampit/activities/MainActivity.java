@@ -1,6 +1,9 @@
 package com.jku.stampit.activities;
 
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
@@ -12,9 +15,11 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.jku.stampit.R;
 import com.jku.stampit.fragments.CardListFragment;
@@ -62,9 +67,9 @@ public class MainActivity extends AppCompatActivity {
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(mViewPager);
+        setUpTabs(mViewPager);
 
+        setTitle("Meine Karten");
 
         //Create Floating Action Button for Camera
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -78,7 +83,37 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void setUpTabs (ViewPager viewPager) {
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        List<Integer> icons = new ArrayList<Integer>();
 
+        icons.add(R.drawable.home);
+        icons.add(R.drawable.map);
+        if (tabLayout != null) {
+            tabLayout.setupWithViewPager(viewPager);
+
+            int tabCount = 2; //tabLayout.getTabCount(); //Assuming you have already somewhere set the adapter for the ViewPager
+
+            for (int i = 0; i < tabCount; i++) {
+                TabLayout.Tab tab = tabLayout.getTabAt(i);
+                if (tab != null){
+                    ImageView customIconView = (ImageView) LayoutInflater.from(tabLayout.getContext()).inflate(R.layout.maintab_layout, null);
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        customIconView.setImageDrawable(getResources().getDrawable(icons.get(i), getApplicationContext().getTheme()));
+                    } else {
+                        customIconView.setImageDrawable(getResources().getDrawable(icons.get(i)));
+                    }
+                    /*Here is where to set image if doing it dynamically
+                    myCustomIcon.setImageBitmap(bitmap);
+
+                    */
+                    //Set Icons for Tabs
+                    tab.setCustomView(customIconView);
+                }
+            }
+        }
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -127,8 +162,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public CharSequence getPageTitle(int position) {
-            return "Tab"+ position;
+        public CharSequence getPageTitle(int position)
+        {
+            //Return no Title, just image which is set in onCreate
+            return "";
         }
     }
 
