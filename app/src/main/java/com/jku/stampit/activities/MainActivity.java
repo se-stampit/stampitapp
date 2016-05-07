@@ -1,5 +1,6 @@
 package com.jku.stampit.activities;
 
+import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -21,13 +22,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.google.zxing.integration.android.IntentIntegrator;
 import com.jku.stampit.R;
 import com.jku.stampit.fragments.CardListFragment;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements  View.OnClickListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -73,16 +75,25 @@ public class MainActivity extends AppCompatActivity {
 
         //Create Floating Action Button for Camera
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent i = new Intent(getApplicationContext(),ScanActivity.class);
-                //i.putExtra("username", user.getDisplayName());
-                startActivity(i);
-            }
-        });
+        fab.setOnClickListener(this);
+
+    }
+    public void onClick(View view) {
+        // Intent i = new Intent(getApplicationContext(),ScanActivity.class);
+        //i.putExtra("username", user.getDisplayName());
+        //  startActivity(i);
+
+        IntentIntegrator integrator = new IntentIntegrator(this);
+        integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES);
+        integrator.setPrompt("Scan a QR Code");
+        integrator.setCameraId(0);  // Use a specific camera of the device
+        integrator.setBeepEnabled(false);
+        integrator.initiateScan();
+
+
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void setUpTabs (ViewPager viewPager) {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         List<Integer> icons = new ArrayList<Integer>();
