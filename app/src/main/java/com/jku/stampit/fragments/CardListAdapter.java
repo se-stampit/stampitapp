@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.jku.stampit.R;
 import com.jku.stampit.data.Card;
+import com.jku.stampit.data.StampCard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,10 +22,10 @@ import java.util.List;
 /**
  * Created by user on 04/05/16.
  */
-public class CardListAdapter extends ArrayAdapter<Card> {
+public class CardListAdapter extends ArrayAdapter<StampCard> {
     private final Context context;
-    private final List<Card> values;
-    public CardListAdapter(Context context, List<Card> cards) {
+    private final List<StampCard> values;
+    public CardListAdapter(Context context, List<StampCard> cards) {
         super(context, 0, cards);
         this.context = context;
         this.values = cards;
@@ -33,7 +34,7 @@ public class CardListAdapter extends ArrayAdapter<Card> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         // Get the data item for this position
-        Card card = getItem(position);
+        StampCard card = getItem(position);
         // Check if an existing view is being reused, otherwise inflate the view
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.fragment_card, parent, false);

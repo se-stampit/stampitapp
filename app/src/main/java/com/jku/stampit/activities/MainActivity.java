@@ -21,9 +21,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 import com.jku.stampit.R;
+import com.jku.stampit.Services.CardManager;
 import com.jku.stampit.fragments.CardListFragment;
 
 import java.util.ArrayList;
@@ -46,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
      */
     private ViewPager mViewPager;
     private List<Fragment> tabs = new ArrayList<Fragment>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +96,25 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
 
 
     }
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        switch(requestCode) {
+            case IntentIntegrator.REQUEST_CODE:  {
+                if (resultCode != RESULT_CANCELED) {
+                    IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+                    String QrCode = scanResult.getContents();
+                    Toast.makeText(getApplication(),QrCode,Toast.LENGTH_LONG).show();
+                    CardManager.getInstance().addStamp(QrCode);
+
+
+                } else {
+                    return;
+                }
+                break;
+            }
+        }
+    }
+
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void setUpTabs (ViewPager viewPager) {
