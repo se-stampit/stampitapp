@@ -12,7 +12,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -71,6 +73,41 @@ public class WebService {
             return "";
         }
         return jsonResult;
+    }
+    public String PutJson(String server, String json)
+    {
+        URL url = null;
+        String jsonResult = "";
+        try {
+            url = new URL(server);
+            HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
+            httpCon.setDoOutput(true);
+            httpCon.setRequestMethod("PUT");
+            OutputStreamWriter out = new OutputStreamWriter(
+                    httpCon.getOutputStream());
+            out.write(json);
+            out.close();
+            InputStream in = new BufferedInputStream(httpCon.getInputStream());
+            if(httpCon.getResponseCode() != 200)
+                return "";
+            String result = org.apache.commons.io.IOUtils.toString(in, "UTF-8");
+            JSONObject jsonObject = new JSONObject(result);
+            jsonResult = jsonObject.toString();
+            return jsonResult;
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return "";
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+            return "";
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return "";
+        }
+
     }
     public String readJsonFromUrl(String url) throws IOException, JSONException {
         InputStream is = new URL(url).openStream();

@@ -1,12 +1,13 @@
 package com.jku.stampit.Services;
 
-import android.app.Application;
 import android.content.Context;
 
-import com.jku.stampit.R;
-import com.jku.stampit.data.Card;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jku.stampit.data.StampCard;
 import com.jku.stampit.data.Company;
 import com.jku.stampit.data.Stamp;
+import com.jku.stampit.dto.CardDTO;
+import com.jku.stampit.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,8 +20,8 @@ import java.util.List;
 public class CardManager {
     private static CardManager instance;
 
-    private final List<Card> mycards = new ArrayList<Card>();
-    private final List<Card> availableCards = new ArrayList<Card>();
+    private final List<StampCard> mycards = new ArrayList<StampCard>();
+    private final List<StampCard> availableStampCards = new ArrayList<StampCard>();
     public static CardManager getInstance()
     {
         if (instance == null)
@@ -32,20 +33,58 @@ public class CardManager {
     }
     private CardManager() {
         mycards.addAll(getDummyCards());
-        availableCards.addAll(getDummyCards());
+        availableStampCards.addAll(getDummyCards());
     }
-    public List<Card> GetMyCards() {
+    public List<StampCard> GetMyCards() {
        return mycards;
     }
-    private List<Card> getDummyCards() {
+    private List<StampCard> getDummyCards() {
 
         Company comp = new Company("FUSSAL");
         Company comp1 = new Company("Pizza Hut");
-        List<Card> cards = new ArrayList<Card>();
-        cards.add(new Card(1,"Yogurt",comp, null ,new ArrayList<Stamp>(),10));
-        cards.add(new Card(2,"Kebap",comp1, null ,new ArrayList<Stamp>(),5));
-        cards.add(new Card(3,"FrozenYogurt",comp, null ,new ArrayList<Stamp>(),7));
-        cards.add(new Card(4,"Pizza",comp1, null ,new ArrayList<Stamp>(),15));
-        return cards;
+        List<StampCard> stampCards = new ArrayList<StampCard>();
+        stampCards.add(new StampCard(1,"Yogurt",comp, null ,new ArrayList<Stamp>(),10));
+        stampCards.add(new StampCard(2,"Kebap",comp1, null ,new ArrayList<Stamp>(),5));
+        stampCards.add(new StampCard(3,"FrozenYogurt",comp, null ,new ArrayList<Stamp>(),7));
+        stampCards.add(new StampCard(4,"Pizza",comp1, null ,new ArrayList<Stamp>(),15));
+        return stampCards;
+    }
+    public boolean addStampCard(StampCard stampCard)
+    {
+        for (StampCard c : mycards) {
+            if(c.getId() == stampCard.getId() && !c.isFull()){
+                return false;
+            }
+        }
+        mycards.add(stampCard);
+        return true;
+    }
+    public boolean addStamp(String qrCode){
+        if(qrCode.isEmpty())
+            return false;
+
+
+        //if hasInternetConnection
+        //parse QR Code for adding it to the correct Stampcard
+        boolean newStampCard = true;
+        for(StampCard card : mycards)
+        {
+            if(card.getId() == 1) {
+                newStampCard = false;
+
+            }
+
+
+        }
+        if(newStampCard)
+        {
+
+        }
+
+        //only for test purposes
+        ObjectMapper mapper = new ObjectMapper();
+        //mapper.writeValueAsString(new CardDTO());
+
+        return true;
     }
 }
