@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jku.stampit.data.User;
 import com.jku.stampit.dto.LoginDTO;
 import com.jku.stampit.dto.SessionTokenDTO;
+import com.jku.stampit.utils.Constants;
 
 /**
  * Created by Andreas on 09.05.16.
@@ -13,7 +14,7 @@ import com.jku.stampit.dto.SessionTokenDTO;
 public class UserManager {
     private static UserManager instance;
     private User user;
-    private ObjectMapper jsonMapper = new ObjectMapper();
+
     private String sessionToken;
 
     public static UserManager getInstance() {
@@ -25,19 +26,16 @@ public class UserManager {
     private UserManager() {
     }
     private boolean login(String authprovider, String token){
+        ObjectMapper jsonMapper = new ObjectMapper();
         LoginDTO login = new LoginDTO();
         login.setAuthprovider(authprovider);
         login.setToken(token);
-
-
         try {
-            String resultJson = "";
-            resultJson = WebService.getInstance().PutJson("", jsonMapper.writeValueAsString(login));
-            if(resultJson == "")
+            WebService.WebServiceReturnObject result = WebService.getInstance().PutJson("", jsonMapper.writeValueAsString(login));
+            if(result.getStatusCode() != Constants.HTTP_RESULT_OK)
                 return false;
 
-            this.sessionToken = jsonMapper.readValue(resultJson, SessionTokenDTO.class).getSessionToken();
-
+            this.sessionToken = jsonMapper.readValue(result.getReturnDataString(), SessionTokenDTO.class).getSessionToken();
 
         }
         catch(Exception e){

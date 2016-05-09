@@ -1,73 +1,87 @@
 package com.jku.stampit.data;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.Image;
+
+import com.jku.stampit.R;
+import com.jku.stampit.StampItApplication;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by user on 03/05/16.
  * a Cards Information is stored here
  */
 public class StampCard {
-    private int id = 0;
-    private int totalStampCount = 0;
-    private List<Stamp> stamps = new ArrayList<Stamp>();
-    private Image cardImage;
-    private Date redeemDate;
-    private String bonus;
-    private String name;
-
+    private String id;
+    private Date createdAt,updatedAt;
+    private String userId,companyId,productName,bonusDescription;
+    private int requiredStampCount,maxDuration,currentStampCount;
+    private boolean isUsed = false;
     private Company company;
-
-    public StampCard(int id, String name, Company company, Image image, List<Stamp> stamps, int totalstamps) {
+    private Bitmap image;
+    private byte[] imageBytes;
+    //TODO should be private and only be Created with newInstance
+    public StampCard(String id, String productName, Company company,String bonusDescription, int requiredStampCount,
+                     int currentStampCount, Date createdAt, Date updatedAt,int maxDuration, Boolean isUsed) {
         this.id = id;
-        this.stamps = stamps;
-        this.totalStampCount = totalstamps;
-        this.cardImage = image;
-        this.name = name;
         this.company = company;
+        this.productName = productName;
+        this.image = image;
+        this.requiredStampCount = requiredStampCount;
+        this.currentStampCount = currentStampCount;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.isUsed = isUsed;
+        this.maxDuration = maxDuration;
+        this.bonusDescription = bonusDescription;
     }
 
     public Boolean isFull() {
-        return stamps.size() == totalStampCount;
+        return requiredStampCount == currentStampCount;
     }
-    public int getTotalStampCount() {
-        return totalStampCount;
+    public Bitmap getImage() {
+        if(company != null) {
+            image = company.getImage();
+        } else {
+            image = BitmapFactory.decodeResource(StampItApplication.getContext().getResources(), R.drawable.missing_icon);
+        }
+        return image;
     }
-    public int getId() {
+    public int getCurrentStampCount() {
+        return currentStampCount;
+    }
+    public void setCurrentStampCount(int stamps) {
+        this.currentStampCount = stamps;
+    }
+
+    public int getRequiredStampCount() {
+        return requiredStampCount;
+    }
+    public void setRequiredStampCount(int stamps) {
+        this.requiredStampCount = stamps;
+    }
+
+    public String getId() {
         return id;
-    }
-    public List<Stamp> getStamps() {
-        return stamps;
-    }
-    public Date getRedeemDate() {
-        return redeemDate;
-    }
-    public void setRedeemDate(Date value) {
-        redeemDate = value;
     }
     public Company getCompany() {
         return company;
     }
-
     public void setCompany(Company company) {
         this.company = company;
     }
 
-    public String getName() {
-        return name;
+    public String getProductName() {
+        return productName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setProductName(String name) {
+        this.productName = name;
     }
 
-    public boolean addStamp(Stamp stamp){
-        if(isFull())
-            return false;
-        stamps.add(stamp);
-        return true;
-    }
 }

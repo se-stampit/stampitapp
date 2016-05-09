@@ -40,8 +40,8 @@ public class WebService {
     /*
     Method which makes post request to serverurl and returns returned json object as string
      */
-    public String PostJson(String server, String json) {
-        String jsonResult = "";
+    public WebServiceReturnObject PostString(String server, String json) {
+        WebServiceReturnObject result = new WebServiceReturnObject();
         HttpURLConnection conn = null;
         URL url = null;
 
@@ -59,25 +59,27 @@ public class WebService {
 
             // read the response
             InputStream in = new BufferedInputStream(conn.getInputStream());
-            String result = org.apache.commons.io.IOUtils.toString(in, "UTF-8");
-            JSONObject jsonObject = new JSONObject(result);
-            jsonResult = jsonObject.toString();
-
+            result.setStatusCode(conn.getResponseCode());
+            if(result.getStatusCode() == 200) {
+                String res = org.apache.commons.io.IOUtils.toString(in, "UTF-8");
+                JSONObject jsonObject = new JSONObject(res);
+                result.setReturnData(jsonObject.toString().getBytes());
+            }
             in.close();
             conn.disconnect();
         } catch (ProtocolException exception) {
 
         } catch (IOException exception) {
-            return "";
+
         }catch (JSONException exception) {
-            return "";
+
         }
-        return jsonResult;
+        return result;
     }
-    public String PutJson(String server, String json)
+    public WebServiceReturnObject PutJson(String server, String json)
     {
+        WebServiceReturnObject result = new WebServiceReturnObject();
         URL url = null;
-        String jsonResult = "";
         try {
             url = new URL(server);
             HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
@@ -88,40 +90,36 @@ public class WebService {
             out.write(json);
             out.close();
             InputStream in = new BufferedInputStream(httpCon.getInputStream());
-            if(httpCon.getResponseCode() != 200)
-                return "";
-            String result = org.apache.commons.io.IOUtils.toString(in, "UTF-8");
-            JSONObject jsonObject = new JSONObject(result);
-            jsonResult = jsonObject.toString();
-            return jsonResult;
+            result.setStatusCode(httpCon.getResponseCode());
+            if(result.getStatusCode() == 200) {
+                String res = org.apache.commons.io.IOUtils.toString(in, "UTF-8");
+                JSONObject jsonObject = new JSONObject(res);
+                result.setReturnData(jsonObject.toString().getBytes());
+            }
         } catch (MalformedURLException e) {
             e.printStackTrace();
-            return "";
         } catch (ProtocolException e) {
             e.printStackTrace();
-            return "";
         } catch (IOException e) {
             e.printStackTrace();
-            return "";
         } catch (JSONException e) {
             e.printStackTrace();
-            return "";
         }
-
+        return result;
     }
-    public String readJsonFromUrl(String url) throws IOException, JSONException {
+
+    public WebServiceReturnObject GetJson(String url) throws IOException, JSONException {
+        WebServiceReturnObject result = new WebServiceReturnObject();
         InputStream is = new URL(url).openStream();
-        String returnString = "";
         try {
             BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
-
             StringBuilder sb = new StringBuilder();
             int cp;
             while ((cp = rd.read()) != -1) {
                 sb.append((char) cp);
             }
-            returnString = sb.toString();
-
+            result.setReturnData(sb.toString().getBytes());
+            result.setStatusCode(200);
             //JSONObject json = new JSONObject(jsonText);
             //return json.toString();
         } catch (IOException exception) {
@@ -133,6 +131,33 @@ public class WebService {
         finally{
             is.close();
         }
-        return returnString;
+        return result;
+    }
+    public class WebServiceReturnObject {
+        private int statusCode = -1;
+        private byte[] returnData;
+
+        public byte[] getReturnData() {
+            return returnData;
+        }
+
+        public void setReturnData(byte[] returnData) {
+            this.returnData = returnData;
+        }
+
+        public int getStatusCode() {
+            return statusCode;
+        }
+
+        public void setStatusCode(int statusCode) {
+            this.statusCode = statusCode;
+        }
+
+        public String getReturnDataString() {
+            if( returnData != null) {
+                return new String(returnData);
+            }
+            return "";
+        }
     }
 }

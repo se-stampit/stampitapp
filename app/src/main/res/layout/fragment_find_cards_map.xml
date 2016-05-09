@@ -5,10 +5,10 @@
     tools:context="com.jku.stampit.fragments.FindCardsMapFragment">
 
     <!-- TODO: Update blank fragment layout -->
-    <fragment
-        android:id="@+id/location_map"
+   <!-- <fragment
+        android:id="@+id/store_map"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        class="com.google.android.gms.maps.SupportMapFragment" />
+        class="com.google.android.gms.maps.SupportMapFragment" />-->
 
 </FrameLayout>

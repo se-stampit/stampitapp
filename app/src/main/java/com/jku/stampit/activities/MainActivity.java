@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -28,11 +29,12 @@ import com.google.zxing.integration.android.IntentResult;
 import com.jku.stampit.R;
 import com.jku.stampit.Services.CardManager;
 import com.jku.stampit.fragments.CardListFragment;
+import com.jku.stampit.fragments.FindCardsMapFragment;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements  View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements  View.OnClickListener, FindCardsMapFragment.OnFragmentInteractionListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -60,9 +62,9 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
 
         //Crete Taps which should be shown
         CardListFragment cardList = new CardListFragment();
-        CardListFragment cardList1 = new CardListFragment();
+        FindCardsMapFragment companyMap = FindCardsMapFragment.newInstance();
         tabs.add(cardList);
-        tabs.add(cardList1);
+        tabs.add(companyMap);
         //tabs.add(FindCardsMapFragment.newInstance("",""));
 
         // Create the adapter that will return a fragment for each of the
@@ -126,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
         if (tabLayout != null) {
             tabLayout.setupWithViewPager(viewPager);
 
-            int tabCount = 2; //tabLayout.getTabCount(); //Assuming you have already somewhere set the adapter for the ViewPager
+            int tabCount = tabLayout.getTabCount(); //Assuming you have already somewhere set the adapter for the ViewPager
 
             for (int i = 0; i < tabCount; i++) {
                 TabLayout.Tab tab = tabLayout.getTabAt(i);
@@ -170,6 +172,7 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
         return super.onOptionsItemSelected(item);
     }
 
+
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -187,7 +190,6 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
         public Fragment getItem(int position) {
             Fragment fragment = fragmentList.get(position);
             return fragment;
-            //return PlaceholderFragment.newInstance(position + 1);
         }
 
         @Override
@@ -201,6 +203,10 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
             //Return no Title, just image which is set in onCreate
             return "";
         }
+    }
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
     }
 
     /**
@@ -216,5 +222,7 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
         //void onListFragmentInteraction(DummyContent.DummyItem item);
+        //Toast.makeText(getActivity(), "this is my Toast message!!! =)",
+        //Toast.LENGTH_LONG).show();
     }
 }

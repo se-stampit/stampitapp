@@ -1,14 +1,24 @@
-package com.jku.stampit.dto;
+package com.jku.stampit.data;
 
 import java.util.Date;
 
 /**
- * Created by Andreas on 09.05.16.
+ * Created by user on 09/05/16.
  */
-public class StoreDTO {
+public class Store {
     private String id,companyId,address;
     private Date createdAt,updatedAt;
-    private Double latitude,longitude;
+    private double latitude,longitude;
+
+    public Store(String id, String companyId, String address, Date createdAt, Date updatedAt, double latitude, double longitude) {
+        this.id = id;
+        this.companyId = id;
+        this.address = address;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
 
     public String getId() {
         return id;
@@ -54,7 +64,7 @@ public class StoreDTO {
         return latitude;
     }
 
-    public void setLatitude(Double latitude) {
+    public void setLatitude(int latitude) {
         this.latitude = latitude;
     }
 
@@ -62,7 +72,7 @@ public class StoreDTO {
         return longitude;
     }
 
-    public void setLongitude(Double longitude) {
+    public void setLongitude(int longitude) {
         this.longitude = longitude;
     }
 }

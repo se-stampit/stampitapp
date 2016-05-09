@@ -1,22 +1,15 @@
 package com.jku.stampit.fragments;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.res.Resources;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.jku.stampit.R;
-import com.jku.stampit.data.Card;
 import com.jku.stampit.data.StampCard;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,9 +35,13 @@ public class CardListAdapter extends ArrayAdapter<StampCard> {
         // Lookup view for data population
         TextView cardCompany = (TextView) convertView.findViewById(R.id.card_company);
         TextView cardName = (TextView) convertView.findViewById(R.id.card_name);
+        TextView cardRequiredStamps = (TextView) convertView.findViewById(R.id.card_requiredStamps);
+        TextView cardCurrentStamps = (TextView) convertView.findViewById(R.id.card_currentstamps);
         // Populate the data into the template view using the data object
-        cardCompany.setText(card.getCompany().getName());
-        cardName.setText(card.getName());
+        cardCompany.setText(card.getCompany().getCompanyName());
+        cardName.setText(card.getProductName());
+        //cardRequiredStamps.setText(card.getRequiredStampCount());
+        //cardCurrentStamps.setText(card.getCurrentStampCount());
         // Return the completed view to render on screen
         return convertView;
     }

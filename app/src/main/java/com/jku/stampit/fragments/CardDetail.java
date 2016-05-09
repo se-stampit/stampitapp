@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.jku.stampit.R;
+import com.jku.stampit.Services.CardManager;
+import com.jku.stampit.data.StampCard;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -22,29 +24,25 @@ import com.jku.stampit.R;
 public class CardDetail extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_cardId = "card";
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
+    private String cardId;
+    private StampCard card;
     private OnFragmentInteractionListener mListener;
 
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
+     * @param cardId card to Show.
      * @return A new instance of fragment CardDetail.
      */
     // TODO: Rename and change types and number of parameters
-    public static CardDetail newInstance(String param1, String param2) {
+    public static CardDetail newInstance(String cardId) {
         CardDetail fragment = new CardDetail();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString(ARG_cardId,cardId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -56,8 +54,7 @@ public class CardDetail extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            card = CardManager.getInstance().GetMyCardForID(getArguments().getString(ARG_cardId));
         }
     }
 
@@ -65,7 +62,9 @@ public class CardDetail extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_card_detail, container, false);
+        View cardView = inflater.inflate(R.layout.fragment_card_detail, container, false);
+
+        return cardView;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
