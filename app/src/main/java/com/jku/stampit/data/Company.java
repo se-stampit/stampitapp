@@ -45,6 +45,7 @@ public class Company {
     }
 
     public void AddStore(Store store) {
+
         this.stores.add(store);
     }
 

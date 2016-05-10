@@ -1,15 +1,23 @@
 package com.jku.stampit.fragments;
 
 import android.content.Context;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -19,6 +27,8 @@ import com.jku.stampit.R;
 import com.jku.stampit.Services.CardManager;
 import com.jku.stampit.data.Company;
 import com.jku.stampit.data.Store;
+import com.jku.stampit.utils.Constants;
+import com.jku.stampit.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +41,8 @@ import java.util.List;
  * Use the {@link FindCardsMapFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FindCardsMapFragment extends Fragment {
+public class FindCardsMapFragment extends Fragment implements
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     //private static final String ARG_PARAM1 = "param1";
@@ -41,9 +52,11 @@ public class FindCardsMapFragment extends Fragment {
     //private String mParam1;
     //private String mParam2;
     private final List<Company> companies = new ArrayList<Company>();
-    private GoogleMap map;
+    private GoogleMap googleMap;
     private OnFragmentInteractionListener mListener;
-
+    private GoogleApiClient mGoogleApiClient;
+    private Location lastLocation;
+    private LayoutInflater inflater;
     public FindCardsMapFragment() {
         // Required empty public constructor
     }
@@ -72,13 +85,51 @@ public class FindCardsMapFragment extends Fragment {
             //mParam2 = getArguments().getString(ARG_PARAM2);
         }
         companies.addAll(CardManager.getInstance().GetAvailableCompanies());
-    }
 
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(getActivity().getApplicationContext())
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
+    }
+    @Override
+    public void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+    @Override
+    public void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        this.inflater = inflater;
         return inflater.inflate(R.layout.fragment_find_cards_map, container, false);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        FragmentManager fm = getChildFragmentManager();
+        Fragment fragment = (SupportMapFragment) fm.findFragmentById(R.id.map_container);
+        if (fragment == null) {
+            fragment = SupportMapFragment.newInstance();
+            fm.beginTransaction().replace(R.id.map_container, fragment).commit();
+        }
+
+        ((SupportMapFragment) fragment).getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap map) {
+                googleMap = map;
+                //googleMap.setInfoWindowAdapter(new MarkerInfoWindowAdapter(inflater));
+                LoadStoresFromCompanies(companies);
+            }
+        });
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -105,6 +156,32 @@ public class FindCardsMapFragment extends Fragment {
         mListener = null;
     }
 
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        if (Utils.checkPermission(getContext(), Constants.ACCESS_COARSE_LOCATION)) {
+            lastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                    mGoogleApiClient);
+
+            if(googleMap != null) {
+                LatLng lastLoc = new LatLng(lastLocation.getLatitude(),lastLocation.getLongitude());
+                // Move the camera instantly to hamburg with a zoom of 15.
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastLoc, 15));
+                // Zoom in, animating the camera.
+                googleMap.animateCamera(CameraUpdateFactory.zoomTo(10), 2000, null);
+            }
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -121,21 +198,21 @@ public class FindCardsMapFragment extends Fragment {
     }
 
     private void LoadStoresFromCompanies(List<Company> companies) {
-        for (Company company : companies){
-            for (Store store : company.getStores()) {
-                //map = ((SupportMapFragment) getFragmentManager().findFragmentById(R.id.store_map))
-                //        .getMap();
+        if(googleMap != null) {
+            for (Company company : companies){
+                for (Store store : company.getStores()) {
 
-                //Marker st = map.addMarker(new MarkerOptions().position(new LatLng(store.getLatitude(),store.getLongitude()))
-                //        .title(company.getCompanyName()).snippet(company.getCompanyAddress()));
+                    //Set company and store as title and snipped and find in MarkerInfoWindowAdapter the store for it
+                    //Marker st = googleMap.addMarker(new MarkerOptions().position(new LatLng(store.getLatitude(),store.getLongitude()))
+                    //        .title(company.getId()).snippet(store.getId()));
 
-                // .icon(BitmapDescriptorFactory.fromBitmap(company.getImage()))
+                    Marker st = googleMap.addMarker(new MarkerOptions().position(new LatLng(store.getLatitude(),store.getLongitude()))
+                            .title(company.getCompanyName()).snippet(store.getAddress()));
+                    //.icon(BitmapDescriptorFactory.fromBitmap(company.getImage())
+                }
             }
         }
-        // Move the camera instantly to hamburg with a zoom of 15.
-        //map.moveCamera(CameraUpdateFactory.newLatLngZoom(HAMBURG, 15));
 
-        // Zoom in, animating the camera.
-        //map.animateCamera(CameraUpdateFactory.zoomTo(10), 2000, null);
+
     }
 }

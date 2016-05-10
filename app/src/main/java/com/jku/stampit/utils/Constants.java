@@ -22,4 +22,8 @@ public class Constants {
 
     //HTTP Constants
     public static final int HTTP_RESULT_OK = 200;
+
+    //Permissions
+    public static final String ACCESS_COARSE_LOCATION = "android.permission.ACCESS_COARSE_LOCATION";
+    public static final String ACCESS_FINE_LOCATION = "android.permission.ACCESS_FINE_LOCATION";
 }

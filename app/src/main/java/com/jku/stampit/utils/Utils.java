@@ -1,6 +1,7 @@
 package com.jku.stampit.utils;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
@@ -16,5 +17,10 @@ public class Utils {
         ConnectivityManager cm = (ConnectivityManager) StampItApplication.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
+    public static boolean checkPermission(Context context, String permission)
+    {
+        int res = context.checkCallingOrSelfPermission(permission);
+        return (res == PackageManager.PERMISSION_GRANTED);
     }
 }

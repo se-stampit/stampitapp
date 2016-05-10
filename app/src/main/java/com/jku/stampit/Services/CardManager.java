@@ -59,13 +59,16 @@ public class CardManager {
         Company comp = new Company(UUID.randomUUID().toString(),"FUSSAL",null);
         Company comp1 = new Company(UUID.randomUUID().toString(),"Pizza Hut",null);
 
-        Store st1 = new Store("asdf","ljöj","Altenbergerstraße 1/3",new Date(),new Date(),48.3366136,14.3171166);
-        Store st2 = new Store("asdf1","ljöj1","Altenbergerstraße 1/3",new Date(),new Date(),48.3466136,14.3171166);
-        Store st3 = new Store("asdf2","ljöj2","Altenbergerstraße 1/3",new Date(),new Date(),48.3366136,14.3271166);
-        Store st4 = new Store("asdf3","ljöj3","Altenbergerstraße 1/3",new Date(),new Date(),48.4166136,14.3171166);
-        Store st5 = new Store("asdf4","ljöj4","Altenbergerstraße 1/3",new Date(),new Date(),48.3666136,14.3271166);
-        Store st6 = new Store("asdf5","ljöj5","Altenbergerstraße 1/3",new Date(),new Date(),48.3066136,14.3671166);
-        Store st7 = new Store("asdf6","ljöj6","Altenbergerstraße 1/3",new Date(),new Date(),48.3366136,14.3171166);
+        dummyCompanies.add(comp);
+        dummyCompanies.add(comp1);
+
+        Store st1 = new Store("asdf","ljöj","Altenbergerstraße 2/3",new Date(),new Date(),48.3366136,14.3171166);
+        Store st2 = new Store("asdf1","ljöj1","Altenbergerstraße 14/3",new Date(),new Date(),48.3466136,14.3171166);
+        Store st3 = new Store("asdf2","ljöj2","Altenbergerstraße 6/3",new Date(),new Date(),48.3366136,14.3271166);
+        Store st4 = new Store("asdf3","ljöj3","Altenbergerstraße 10/1",new Date(),new Date(),48.4166136,14.3171166);
+        Store st5 = new Store("asdf4","ljöj4","Altenbergerstraße 5/1",new Date(),new Date(),48.3666136,14.3271166);
+        Store st6 = new Store("asdf5","ljöj5","Altenbergerstraße 8/3",new Date(),new Date(),48.3066136,14.3671166);
+        Store st7 = new Store("asdf6","ljöj6","Altenbergerstraße 23/3",new Date(),new Date(),48.3366136,14.3171166);
 
         comp.AddStore(st1);
         comp.AddStore(st2);
@@ -131,7 +134,35 @@ public class CardManager {
         }
         return null;
     }
+    public Company GetCompanyForID(String companyID) {
+        for (Company company : availableCompanies) {
+            if(company.getId() == companyID) {
+                return company;
+            }
+        }
+        return null;
+    }
+    public Store GetStoreFromCompany(Company company, String storeID) {
+         for (Store store : company.getStores()) {
+             if(store.getId() == storeID) {
+                 return store;
+             }
+         }
 
+        return null;
+    }
+    public Store GetStoreForID(String companyID, String storeID) {
+        for (Company company : availableCompanies) {
+            if(company.getId() == companyID) {
+                for (Store store : company.getStores()) {
+                    if(store.getId() == storeID) {
+                        return store;
+                    }
+                }
+            }
+        }
+        return null;
+    }
     public void LoadStampCardsFromServer() {
         ObjectMapper jsonMapper = new ObjectMapper();
         WebService.WebServiceReturnObject result;
