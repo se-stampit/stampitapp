@@ -1,7 +1,9 @@
 package com.jku.stampit.Services;
 
 import android.content.Context;
+import android.util.Log;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jku.stampit.StampItApplication;
 import com.jku.stampit.data.StampCard;
@@ -11,12 +13,15 @@ import com.jku.stampit.data.Store;
 import com.jku.stampit.dto.CardDTO;
 import com.jku.stampit.dto.CompanyDTO;
 import com.jku.stampit.dto.SessionTokenDTO;
+import com.jku.stampit.dto.StampCodeDTO;
 import com.jku.stampit.utils.Constants;
 import com.jku.stampit.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -30,6 +35,7 @@ public class CardManager {
     private final List<Company> availableCompanies = new ArrayList<Company>();
     //List for unverified Tokens, which must be sent to server
     //We dont know Syntax in Application for Security Reasons
+    private ObjectMapper mapper;
 
     private final List<String> unverifiedStampTokens = new ArrayList<String>();
 
@@ -45,6 +51,7 @@ public class CardManager {
     private CardManager() {
         mycards.addAll(getDummyCards());
         availableCompanies.addAll(getDummyCompanies());
+        mapper = new ObjectMapper();
     }
     public List<StampCard> GetMyCards() {
        return mycards;
@@ -107,16 +114,28 @@ public class CardManager {
 
 
         if(Utils.HasInternetConnection(StampItApplication.getContext())) {
-            //TODO Send qr to Server
-            WebService.WebServiceReturnObject ret = WebService.getInstance().PostString("",qrCode);
+            Map<String,String> header = new HashMap<String,String>();
+            header.put("auth", UserManager.getInstance().getSessionToken());
+            StampCodeDTO code = new StampCodeDTO();
+            code.setStampcode(qrCode);
+            String json = "";
+            try {
+                json = mapper.writeValueAsString(code);
+                Log.d(this.getClass().toString(), "JsonString:\r\n" + json);
+            WebService.WebServiceReturnObject ret = WebService.getInstance().PostString(Constants.AddStampURL,header,json);
 
             //Check if connection was successfull
             if(ret.getStatusCode() == Constants.HTTP_RESULT_OK) {
                 //TODO Request Card with ID or userid from Server
                 //TODO Maybe add completionHandler to Update Current View
+
+
             }
             else {
                 unverifiedStampTokens.add(qrCode);
+            }
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
             }
         }
 

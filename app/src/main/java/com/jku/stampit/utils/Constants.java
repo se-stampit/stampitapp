@@ -6,7 +6,7 @@ package com.jku.stampit.utils;
 public class Constants {
 
     //Schnittstelle
-    public static final String ServerURL = "";
+    public static final String ServerURL = "https://stampit.azurewebsites.net/api";
     public static final String AddStampURL = ServerURL + "/me/scan/addstamps";
     public static final String GetUserDetailURL = ServerURL + "/me";
     public static final String GetMyStampCardsURL = ServerURL + "/me/stampcard";
@@ -22,6 +22,8 @@ public class Constants {
 
     //HTTP Constants
     public static final int HTTP_RESULT_OK = 200;
+    public static final int HTTP_RESULT_BAD_REQUEST = 400;
+    public static final int HTTP_RESULT_NOT_AUTHORIZED = 401;
 
     //Permissions
     public static final String ACCESS_COARSE_LOCATION = "android.permission.ACCESS_COARSE_LOCATION";

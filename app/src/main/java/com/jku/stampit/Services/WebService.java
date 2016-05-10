@@ -1,6 +1,7 @@
 package com.jku.stampit.Services;
 
 import android.os.Looper;
+import android.util.Log;
 
 import org.apache.http.params.HttpConnectionParams;
 import org.json.JSONException;
@@ -18,18 +19,21 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.Map;
 
 /**
  * Created by user on 07/05/16.
  */
 public class WebService {
     private static WebService instance;
+    public static final Map<String,String> NO_HEADER_PARAM = null;
     public static WebService getInstance()
     {
         if (instance == null)
         {
             // Create the instance
             instance = new WebService();
+
         }
         return instance;
     }
@@ -40,7 +44,7 @@ public class WebService {
     /*
     Method which makes post request to serverurl and returns returned json object as string
      */
-    public WebServiceReturnObject PostString(String server, String json) {
+    public WebServiceReturnObject PostString(String server, Map<String,String> headParams, String json) {
         WebServiceReturnObject result = new WebServiceReturnObject();
         HttpURLConnection conn = null;
         URL url = null;
@@ -53,6 +57,12 @@ public class WebService {
             conn.setDoOutput(true);
             conn.setDoInput(true);
             conn.setRequestMethod("POST");
+            //conn.addRequestProperty("auth", UserManager.getInstance().getSessionToken());
+            if(headParams != WebService.NO_HEADER_PARAM) {
+                for (String key : headParams.keySet()) {
+                    conn.addRequestProperty(key, headParams.get(key));
+                }
+            }
             OutputStream os = conn.getOutputStream();
             os.write(json.getBytes("UTF-8"));
             os.close();
@@ -76,7 +86,7 @@ public class WebService {
         }
         return result;
     }
-    public WebServiceReturnObject PutJson(String server, String json)
+    public WebServiceReturnObject PutJson(String server, Map<String,String> headParams, String json)
     {
         WebServiceReturnObject result = new WebServiceReturnObject();
         URL url = null;
@@ -85,6 +95,11 @@ public class WebService {
             HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
             httpCon.setDoOutput(true);
             httpCon.setRequestMethod("PUT");
+            if(headParams != WebService.NO_HEADER_PARAM) {
+                for (String key : headParams.keySet()) {
+                    httpCon.addRequestProperty(key, headParams.get(key));
+                }
+            }
             OutputStreamWriter out = new OutputStreamWriter(
                     httpCon.getOutputStream());
             out.write(json);
