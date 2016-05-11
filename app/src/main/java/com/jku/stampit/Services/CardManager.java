@@ -1,6 +1,5 @@
 package com.jku.stampit.Services;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -8,15 +7,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jku.stampit.StampItApplication;
 import com.jku.stampit.data.StampCard;
 import com.jku.stampit.data.Company;
-import com.jku.stampit.data.Stamp;
 import com.jku.stampit.data.Store;
 import com.jku.stampit.dto.CardDTO;
 import com.jku.stampit.dto.CompanyDTO;
-import com.jku.stampit.dto.SessionTokenDTO;
 import com.jku.stampit.dto.StampCodeDTO;
 import com.jku.stampit.utils.Constants;
 import com.jku.stampit.utils.Utils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -125,7 +123,7 @@ public class CardManager {
             try {
                 json = mapper.writeValueAsString(code);
                 Log.d(this.getClass().toString(), "JsonString:\r\n" + json);
-            WebService.WebServiceReturnObject ret = WebService.getInstance().PostString(Constants.ScanStampURL,header,json);
+            WebserviceReturnObject ret = WebService.getInstance().PostString(Constants.ScanStampURL,header,json);
 
             //Check if connection was successfull
             if(ret.getStatusCode() == Constants.HTTP_RESULT_OK) {
@@ -187,35 +185,26 @@ public class CardManager {
     }
     public void LoadMyStampCardsFromServer() {
         ObjectMapper jsonMapper = new ObjectMapper();
-        WebService.WebServiceReturnObject result;
-        if(Utils.HasInternetConnection(StampItApplication.getContext())){
-            try {
-                result = WebService.getInstance().GetJSON(Constants.GetMyStampCardsURL);
+        WebserviceReturnObject result;
+        new HttpGetJsonRequest(){
+            @Override
+            protected void onPostExecute(WebserviceReturnObject result) {
                 if(result.getStatusCode() != Constants.HTTP_RESULT_OK) {
                     String tmp = result.getReturnString();
                 }
-
-                List<CompanyDTO> tmp = (List<CompanyDTO>)jsonMapper.readValue(result.getReturnString(), CompanyDTO.class);
-
-                for (CompanyDTO comp : tmp) {
-                    String s = comp.getCompanyName();
-                    String s1 = comp.getDescription();
+                ObjectMapper jsonMapper = new ObjectMapper();
+                try{
+                    List<CardDTO> tmp = (List<CardDTO>)jsonMapper.readValue(result.getReturnString(), CardDTO.class);
+                } catch(IOException exception) {
+                   String s = exception.getStackTrace().toString();
                 }
-                //TODO Cast result to specific type and provide cards, where do i get card informations?
-                //this.availableStampCards.clear();
-                //this.availableStampCards.addAll(tmp);
             }
-            catch(Exception e){
-                e.printStackTrace();
-            }
-        }
-       else {
-            String s = "No internet connection";
-        }
+        }.execute(Constants.GetMyStampCardsURL);
+
     }
     public void LoadProvidersFromServer() {
         ObjectMapper jsonMapper = new ObjectMapper();
-        WebService.WebServiceReturnObject result;
+        WebserviceReturnObject result;
         try {
             result = WebService.getInstance().GetJSON(Constants.GetStampItProvidersURL);
             if(result.getStatusCode() != Constants.HTTP_RESULT_OK) {
