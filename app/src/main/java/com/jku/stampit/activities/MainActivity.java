@@ -28,8 +28,10 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.jku.stampit.R;
 import com.jku.stampit.Services.CardManager;
+import com.jku.stampit.data.StampCard;
 import com.jku.stampit.fragments.CardListFragment;
 import com.jku.stampit.fragments.FindCardsMapFragment;
+import com.jku.stampit.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,6 +85,13 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(this);
 
+        CardManager.getInstance().LoadMyStampCardsFromServer(new CardManager.CardManagerCardUpdateCallback() {
+            @Override
+            public void CardsUpdated(List<StampCard> newCards) {
+                recreate();
+            }
+        });
+
     }
     public void onClick(View view) {
         // Intent i = new Intent(getApplicationContext(),ScanActivity.class);
@@ -95,8 +104,6 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
         integrator.setCameraId(0);  // Use a specific camera of the device
         integrator.setBeepEnabled(false);
         integrator.initiateScan();
-
-
     }
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
@@ -104,11 +111,36 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
             case IntentIntegrator.REQUEST_CODE:  {
                 if (resultCode != RESULT_CANCELED) {
                     IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-                    String QrCode = scanResult.getContents();
-                    Toast.makeText(getApplication(),QrCode,Toast.LENGTH_LONG).show();
-                    CardManager.getInstance().ScanStamp(QrCode);
-
-
+                    final String QrCode = scanResult.getContents();
+                    //Toast.makeText(getApplication(),QrCode,Toast.LENGTH_LONG).show();
+                    CardManager.getInstance().ScanStamp(QrCode, new CardManager.CardManagerScanListener() {
+                        @Override
+                        public void ScanSuccessfull(Integer statusCode) {
+                            if(statusCode == Constants.HTTP_RESULT_OK) {
+                                runOnUiThread(new Runnable() {
+                                    public void run()
+                                    {
+                                        Toast.makeText(getApplication(),"Code erfolgreich eingelöst",Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                                //TODO Load new Cards from Server
+                                CardManager.getInstance().LoadMyStampCardsFromServer(new CardManager.CardManagerCardUpdateCallback() {
+                                    @Override
+                                    public void CardsUpdated(List<StampCard> newCards) {
+                                        recreate();
+                                    }
+                                });
+                            }
+                            else if(statusCode == Constants.HTTP_RESULT_BAD_REQUEST) {
+                                runOnUiThread(new Runnable() {
+                                    public void run()
+                                    {
+                                        Toast.makeText(getApplication(),"Code wurde bereits eingelöst",Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                            }
+                        }
+                    });
                 } else {
                     return;
                 }
@@ -175,7 +207,6 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
         return super.onOptionsItemSelected(item);
     }
 
-
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -228,4 +259,5 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
         //Toast.makeText(getActivity(), "this is my Toast message!!! =)",
         //Toast.LENGTH_LONG).show();
     }
+
 }

@@ -12,6 +12,8 @@ import java.net.URL;
  * Created by user on 11/05/16.
  */
 public class HttpGetJsonRequest extends AsyncTask<String,Void,WebserviceReturnObject> {
+
+
     @Override
     protected void onPreExecute() {
         super.onPreExecute();

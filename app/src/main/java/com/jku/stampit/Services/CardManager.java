@@ -43,6 +43,15 @@ public class CardManager {
 
     private final List<String> unverifiedStampTokens = new ArrayList<String>();
 
+    public interface CardManagerScanListener
+    {
+        public void ScanSuccessfull(Integer statusCode );
+    }
+    public interface CardManagerCardUpdateCallback
+    {
+        public void CardsUpdated(List<StampCard> newCards);
+    }
+
     public static CardManager getInstance()
     {
         if (instance == null)
@@ -58,7 +67,7 @@ public class CardManager {
         mycards.addAll(getDummyCards());
         availableCompanies.addAll(getDummyCompanies());
 
-        LoadMyStampCardsFromServer();
+        //LoadMyStampCardsFromServer();
         LoadProvidersFromServer();
     }
     public List<StampCard> GetMyCards() {
@@ -118,15 +127,16 @@ public class CardManager {
         return true;
     }
     */
-    public boolean ScanStamp(String qrCode){
+    public void ScanStamp(String qrCode, final CardManagerScanListener callback){
         if(qrCode.isEmpty())
-            return false;
+            return;
 
         Map<String,String> header = new HashMap<String,String>();
         header.put("auth", UserManager.getInstance().getSessionToken());
         StampCodeDTO code = new StampCodeDTO();
         code.setStampcode(qrCode);
         String json = "";
+        Boolean returnvalue = false;
         try {
             json = mapper.writeValueAsString(code);
             Log.d(this.getClass().toString(), "JsonString:\r\n" + json);
@@ -136,12 +146,14 @@ public class CardManager {
                 new HttpPostJsonRequest(null) {
                     @Override
                     protected void onPostExecute(WebserviceReturnObject result) {
-                        if (result.getStatusCode() != Constants.HTTP_RESULT_OK) {
-                            //Return OK, load new cards
-                            LoadMyStampCardsFromServer();
+                        if (result.getStatusCode() == Constants.HTTP_RESULT_OK) {
+
                         } else {
                             unverifiedStampTokens.add(contentToSend);
                             //TODO Return something went wrong
+                        }
+                        if(callback != null) {
+                            callback.ScanSuccessfull(result.getStatusCode());
                         }
                     }
                 }.execute(Constants.ScanStampURL,mapper.writeValueAsString(code));
@@ -149,12 +161,6 @@ public class CardManager {
         } catch (JsonProcessingException e) {
         e.printStackTrace();
         }
-
-        //only for test purposes
-        ObjectMapper mapper = new ObjectMapper();
-        //mapper.writeValueAsString(new CardDTO());
-
-        return true;
     }
     public StampCard GetMyCardForID(String id) {
         for(StampCard card : mycards) {
@@ -193,7 +199,7 @@ public class CardManager {
         }
         return null;
     }
-    public void LoadMyStampCardsFromServer() {
+    public void LoadMyStampCardsFromServer(final CardManagerCardUpdateCallback callback) {
         ObjectMapper jsonMapper = new ObjectMapper();
         WebserviceReturnObject result;
         //String json = "[{\"id\":\"ef946eebfbb24f84bff2086b3686f93f\",\"createdAt\":\"2016-05-11T09:28:58.842291+00:00\",\"updatedAt\":null,\"userId\":\"e805e74cbd164ce48a0a47ec4f8349eb\",\"companyId\":\"41337af111404588b33e6bbfe8933a49\",\"productName\":\"Coffee\",\"requiredStampCount\":10,\"bonusDescription\":\"Get one free coffee\",\"maxDuration\":365,\"isUsed\":false,\"currentStampCount\":0}]";
@@ -210,13 +216,15 @@ public class CardManager {
                             TypeFactory.defaultInstance().constructCollectionType(List.class,
                                     CardDTO.class));
 
-
+                    //TODO when clear cards?
                     mycards.clear();
                     mycards.addAll(getStampCardList(cards));
                 } catch(IOException exception) {
                    String s = exception.getStackTrace().toString();
                 }
-                //TODO call UI for updates
+                if(callback != null) {
+                    callback.CardsUpdated(mycards);
+                }
             }
         }.execute(Constants.GetMyStampCardsURL);
 

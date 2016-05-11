@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -14,12 +15,15 @@ import android.widget.Toast;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 
@@ -28,8 +32,10 @@ import com.jku.stampit.utils.Utils;
 
 import java.io.IOException;
 
-public class LoginActivity extends Activity implements ConnectionCallbacks, OnConnectionFailedListener, View.OnClickListener {
+//ConnectionCallbacks,
+public class LoginActivity extends FragmentActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
 
+    private static final int RC_SIGN_IN = 9001;
     private static final int STATE_DEFAULT = 0;
     private static final int STATE_SIGN_IN = 1;
     private static final int STATE_IN_PROGRESS = 2;
@@ -51,11 +57,10 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         // dummy username for testing purposes
-     Intent i = new Intent(getApplicationContext(), MainActivity.class);
+        //Intent i = new Intent(getApplicationContext(), MainActivity.class);
         //i.putExtra("username", "Benjamin Harvey");
         //username = "Benjamin Harvey";
-        startActivity(i);
-
+        //startActivity(i);
 
         mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);
         mSignInButton.setOnClickListener(this);
@@ -65,19 +70,28 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
                     SAVED_PROGRESS, STATE_DEFAULT);
         }
 
-
         mGoogleApiClient = buildGoogleApiClient();
+
+        //TODO Check if user already signed in
 
     }
     private GoogleApiClient buildGoogleApiClient()
     {
+
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+
+
+        // Build a GoogleApiClient with access to the Google Sign-In API and the
+        // options specified by gso.
         return new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(Plus.API)
-                .addScope(Plus.SCOPE_PLUS_LOGIN).build();
+                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
     }
 
+    /*
     @Override
     protected void onStart()
     {
@@ -95,57 +109,116 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
             mGoogleApiClient.disconnect();
         }
     }
-
+*/
+    /*
     @Override
     protected void onSaveInstanceState(Bundle outState)
     {
         super.onSaveInstanceState(outState);
         outState.putInt(SAVED_PROGRESS, mSignInProgress);
     }
-
+*/
     @Override
     public void onClick(View v)
     {
-
         if (!mGoogleApiClient.isConnecting())
         {
             switch (v.getId())
             {
                 case R.id.sign_in_button:
-                    resolveSignInError();
+                    //resolveSignInError();
+
+                    signIn();
                     break;
             }
         }
     }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
+        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
+        if (requestCode == RC_SIGN_IN) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            handleSignInResult(result);
+        }
+    }
+
+    private void handleSignInResult(GoogleSignInResult result) {
+        //Log.d(TAG, "handleSignInResult:" + result.isSuccess());
+        if (result.isSuccess()) {
+            // Signed in successfully, show authenticated UI.
+            GoogleSignInAccount acct = result.getSignInAccount();
+            //TODO Send Token to Server
+            String token = result.getSignInAccount().getIdToken();
+            //mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
+            //   mStatusTextView.setText(getString(R.string.auth_google_play_services_client_google_display_name,acct.getDisplayName()));
+
+            updateUI(true);
+        } else {
+            // Signed out, show unauthenticated UI.
+            updateUI(false);
+
+        }
+    }
+
+    private void finishLogin() {
+        Intent i = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(i);
+    }
+
+    private void updateUI(boolean signedIn) {
+        if (signedIn) {
+            //Show Main Screen
+            finishLogin();
+        } else {
+            //   mStatusTextView.setText(R.string.signed_out);
+            findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
+            // findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
+            Toast.makeText(getApplicationContext(), "Login fehlgeschlagen", Toast.LENGTH_SHORT).show();
+        }
+    }
+    /*
     @Override
     public void onConnected(Bundle connectionHint)
     {
         mSignInButton.setEnabled(false);
 
-        Person currentUser = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
-        username = currentUser.getDisplayName();
+        Auth.GoogleSignInApi.
+        //Person currentUser = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
+        //username = currentUser.getDisplayName();
 
-        Toast toast = Toast.makeText(getApplicationContext(),
-                "Welcome " + username + "ID:" + currentUser.getId(), Toast.LENGTH_LONG);
-        toast.show();
+        //Toast toast = Toast.makeText(getApplicationContext(),
+        //        "Welcome " + username + "ID:" + currentUser.getId(), Toast.LENGTH_LONG);
+        //toast.show();
 
 
-        mSignInProgress = STATE_DEFAULT;
+        //mSignInProgress = STATE_DEFAULT;
         Intent i = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(i);
         finish();
     }
-
-    private void finish(Person user) {
-        Intent i = new Intent(getApplicationContext(),
-                MainActivity.class);
-        i.putExtra("username", user.getDisplayName());
-        startActivity(i);
+    */
+    private void signIn() {
+        findViewById(R.id.sign_in_button).setVisibility(View.GONE);
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+    private void signOut() {
+        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(Status status) {
+                        // [START_EXCLUDE]
+                        updateUI(false);
+                        // [END_EXCLUDE]
+                    }
+                });
     }
     @Override
     public void onConnectionFailed(ConnectionResult result)
     {
+        /*
         if (mSignInProgress != STATE_IN_PROGRESS)
         {
             mSignInIntent = result.getResolution();
@@ -154,6 +227,7 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
                 resolveSignInError();
             }
         }
+        */
     }
 
     private void resolveSignInError()
@@ -182,35 +256,6 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
                     "Error signing in", Toast.LENGTH_SHORT)
                     .show();
         }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode,
-                                    int resultCode, Intent data)
-    {
-        switch (requestCode)
-        {
-            case 0:
-                if (resultCode == RESULT_OK)
-                {
-                    mSignInProgress = STATE_SIGN_IN;
-                }
-                else
-                {
-                    mSignInProgress = STATE_DEFAULT;
-                }
-                if (!mGoogleApiClient.isConnecting())
-                {
-                    mGoogleApiClient.connect();
-                }
-                break;
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int cause)
-    {
-        mGoogleApiClient.connect();
     }
 
     @Override

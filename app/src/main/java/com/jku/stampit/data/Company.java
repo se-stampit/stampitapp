@@ -66,6 +66,9 @@ public class Company {
     }
 
     public String getCompanyName() {
+        if (companyName == null) {
+            return "";
+        }
         return companyName;
     }
 
@@ -74,6 +77,9 @@ public class Company {
     }
 
     public String getCompanyAddress() {
+        if (companyAddress == null) {
+            return "";
+        }
         return companyAddress;
     }
 
