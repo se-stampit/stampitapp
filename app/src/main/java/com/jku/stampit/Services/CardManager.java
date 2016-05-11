@@ -144,7 +144,7 @@ public class CardManager {
                             //TODO Return something went wrong
                         }
                     }
-                }.execute(Constants.GetMyStampCardsURL,qrCode);
+                }.execute(Constants.ScanStampURL,mapper.writeValueAsString(code));
             }
         } catch (JsonProcessingException e) {
         e.printStackTrace();
