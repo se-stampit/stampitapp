@@ -50,8 +50,8 @@ public class WebService {
     /*
     Method which makes post request to serverurl and returns returned json object as string
      */
-    public WebServiceReturnObject PostString(String server, Map<String,String> headParams, String json) {
-        WebServiceReturnObject result = new WebServiceReturnObject();
+    public WebserviceReturnObject PostString(String server, Map<String,String> headParams, String json) {
+        WebserviceReturnObject result = new WebserviceReturnObject();
         HttpURLConnection conn = null;
         URL url = null;
 
@@ -92,9 +92,9 @@ public class WebService {
         }
         return result;
     }
-    public WebServiceReturnObject PutJson(String server, Map<String,String> headParams, String json)
+    public WebserviceReturnObject PutJson(String server, Map<String,String> headParams, String json)
     {
-        WebServiceReturnObject result = new WebServiceReturnObject();
+        WebserviceReturnObject result = new WebserviceReturnObject();
         URL url = null;
         try {
             url = new URL(server);
@@ -139,10 +139,10 @@ public class WebService {
      * @return
      * @throws Exception
      */
-    public WebServiceReturnObject GetJSON(String urlString)
+    public WebserviceReturnObject GetJSON(String urlString)
             throws Exception
     {
-        WebServiceReturnObject result = new WebServiceReturnObject();
+        WebserviceReturnObject result = new WebserviceReturnObject();
         URL url = null;
         BufferedReader reader = null;
         StringBuilder stringBuilder;
@@ -225,25 +225,5 @@ public class WebService {
         return result;
     }
     */
-    public class WebServiceReturnObject {
-        private int statusCode = -1;
-        private String returnString = "";
 
-        public String getReturnString() {
-            return returnString;
-        }
-
-        public void setReturnString(String returnString) {
-            this.returnString = returnString;
-        }
-
-        public int getStatusCode() {
-            return statusCode;
-        }
-
-        public void setStatusCode(int statusCode) {
-            this.statusCode = statusCode;
-        }
-
-    }
 }

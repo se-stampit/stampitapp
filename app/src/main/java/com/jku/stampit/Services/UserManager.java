@@ -31,7 +31,7 @@ public class UserManager {
         login.setAuthprovider(authprovider);
         login.setToken(token);
         try {
-            WebService.WebServiceReturnObject result = WebService.getInstance().PutJson(Constants.LoginURL,WebService.NO_HEADER_PARAM,jsonMapper.writeValueAsString(login));
+            WebserviceReturnObject result = WebService.getInstance().PutJson(Constants.LoginURL,WebService.NO_HEADER_PARAM,jsonMapper.writeValueAsString(login));
             if(result.getStatusCode() == Constants.HTTP_RESULT_BAD_REQUEST)
                 return false;
             if(result.getStatusCode() == Constants.HTTP_RESULT_NOT_AUTHORIZED){
