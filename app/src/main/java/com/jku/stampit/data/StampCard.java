@@ -26,6 +26,20 @@ public class StampCard {
     private Bitmap image;
     private byte[] imageBytes;
     //TODO should be private and only be Created with newInstance
+    public StampCard(String id, String productName, String companyId,String bonusDescription, int requiredStampCount,
+                     int currentStampCount, Date createdAt, Date updatedAt,int maxDuration, Boolean isUsed) {
+        this.id = id;
+        this.companyId = companyId;
+        this.productName = productName;
+        this.image = image;
+        this.requiredStampCount = requiredStampCount;
+        this.currentStampCount = currentStampCount;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.isUsed = isUsed;
+        this.maxDuration = maxDuration;
+        this.bonusDescription = bonusDescription;
+    }
     public StampCard(String id, String productName, Company company,String bonusDescription, int requiredStampCount,
                      int currentStampCount, Date createdAt, Date updatedAt,int maxDuration, Boolean isUsed) {
         this.id = id;

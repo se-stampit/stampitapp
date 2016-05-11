@@ -174,6 +174,9 @@ public class FindCardsMapFragment extends Fragment implements
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastLoc, 15));
                 // Zoom in, animating the camera.
                 googleMap.animateCamera(CameraUpdateFactory.zoomTo(10), 2000, null);
+
+                Marker myLoc = googleMap.addMarker(new MarkerOptions().position(lastLoc)
+                        .title("My Position").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
             }
         }
     }
@@ -213,8 +216,7 @@ public class FindCardsMapFragment extends Fragment implements
                     //        .title(company.getId()).snippet(store.getId()));
 
                     Marker st = googleMap.addMarker(new MarkerOptions().position(new LatLng(store.getLatitude(),store.getLongitude()))
-                            .title(company.getCompanyName()).snippet(store.getAddress()));
-                    //.icon(BitmapDescriptorFactory.fromBitmap(company.getImage())
+                            .title(company.getCompanyName()).snippet(store.getAddress()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
                 }
             }
         }

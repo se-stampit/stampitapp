@@ -1,9 +1,11 @@
 package com.jku.stampit.Services;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.jku.stampit.StampItApplication;
 import com.jku.stampit.data.StampCard;
 import com.jku.stampit.data.Company;
@@ -13,6 +15,10 @@ import com.jku.stampit.dto.CompanyDTO;
 import com.jku.stampit.dto.StampCodeDTO;
 import com.jku.stampit.utils.Constants;
 import com.jku.stampit.utils.Utils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -47,6 +53,8 @@ public class CardManager {
         return instance;
     }
     private CardManager() {
+        mapper = new ObjectMapper();
+
         mycards.addAll(getDummyCards());
         availableCompanies.addAll(getDummyCompanies());
 
@@ -114,30 +122,32 @@ public class CardManager {
         if(qrCode.isEmpty())
             return false;
 
-        if(Utils.HasInternetConnection(StampItApplication.getContext())) {
-            Map<String,String> header = new HashMap<String,String>();
-            header.put("auth", UserManager.getInstance().getSessionToken());
-            StampCodeDTO code = new StampCodeDTO();
-            code.setStampcode(qrCode);
-            String json = "";
-            try {
-                json = mapper.writeValueAsString(code);
-                Log.d(this.getClass().toString(), "JsonString:\r\n" + json);
-            WebserviceReturnObject ret = WebService.getInstance().PostString(Constants.ScanStampURL,header,json);
+        Map<String,String> header = new HashMap<String,String>();
+        header.put("auth", UserManager.getInstance().getSessionToken());
+        StampCodeDTO code = new StampCodeDTO();
+        code.setStampcode(qrCode);
+        String json = "";
+        try {
+            json = mapper.writeValueAsString(code);
+            Log.d(this.getClass().toString(), "JsonString:\r\n" + json);
 
-            //Check if connection was successfull
-            if(ret.getStatusCode() == Constants.HTTP_RESULT_OK) {
-                //TODO Request Card with ID or userid from Server
-                //TODO Maybe add completionHandler to Update Current View
+            if (Utils.HasInternetConnection(StampItApplication.getContext())) {
 
-
+                new HttpPostJsonRequest(null) {
+                    @Override
+                    protected void onPostExecute(WebserviceReturnObject result) {
+                        if (result.getStatusCode() != Constants.HTTP_RESULT_OK) {
+                            //Return OK, load new cards
+                            LoadMyStampCardsFromServer();
+                        } else {
+                            unverifiedStampTokens.add(contentToSend);
+                            //TODO Return something went wrong
+                        }
+                    }
+                }.execute(Constants.GetMyStampCardsURL,qrCode);
             }
-            else {
-                unverifiedStampTokens.add(qrCode);
-            }
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
+        } catch (JsonProcessingException e) {
+        e.printStackTrace();
         }
 
         //only for test purposes
@@ -186,6 +196,8 @@ public class CardManager {
     public void LoadMyStampCardsFromServer() {
         ObjectMapper jsonMapper = new ObjectMapper();
         WebserviceReturnObject result;
+        //String json = "[{\"id\":\"ef946eebfbb24f84bff2086b3686f93f\",\"createdAt\":\"2016-05-11T09:28:58.842291+00:00\",\"updatedAt\":null,\"userId\":\"e805e74cbd164ce48a0a47ec4f8349eb\",\"companyId\":\"41337af111404588b33e6bbfe8933a49\",\"productName\":\"Coffee\",\"requiredStampCount\":10,\"bonusDescription\":\"Get one free coffee\",\"maxDuration\":365,\"isUsed\":false,\"currentStampCount\":0}]";
+
         new HttpGetJsonRequest(){
             @Override
             protected void onPostExecute(WebserviceReturnObject result) {
@@ -194,13 +206,28 @@ public class CardManager {
                 }
                 ObjectMapper jsonMapper = new ObjectMapper();
                 try{
-                    List<CardDTO> tmp = (List<CardDTO>)jsonMapper.readValue(result.getReturnString(), CardDTO.class);
+                    List<CardDTO> cards = mapper.readValue(result.getReturnString(),
+                            TypeFactory.defaultInstance().constructCollectionType(List.class,
+                                    CardDTO.class));
+
+
+                    mycards.clear();
+                    mycards.addAll(getStampCardList(cards));
                 } catch(IOException exception) {
                    String s = exception.getStackTrace().toString();
                 }
+                //TODO call UI for updates
             }
         }.execute(Constants.GetMyStampCardsURL);
 
+    }
+    private List<StampCard> getStampCardList(List<CardDTO> cards) {
+        List<StampCard> newCards = new ArrayList<StampCard>();
+
+        for(CardDTO cd : cards){
+            newCards.add(new StampCard(cd.getId(),cd.getProductName(),cd.getCompanyId(),cd.getBonusDescription(),cd.getRequiredStampCount(),cd.getCurrentStampCount(),cd.getCreatedAt(),cd.getUpdatedAt(),cd.getMaxDuration(),cd.isUsed()));
+        }
+        return newCards;
     }
     public void LoadProvidersFromServer() {
         ObjectMapper jsonMapper = new ObjectMapper();
