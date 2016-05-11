@@ -1,6 +1,7 @@
 package com.jku.stampit.Services;
 
 import android.os.Looper;
+import android.util.Log;
 
 import org.apache.http.params.HttpConnectionParams;
 import org.json.JSONException;
@@ -110,8 +111,9 @@ public class WebService {
 
     public WebServiceReturnObject GetJson(String url) throws IOException, JSONException {
         WebServiceReturnObject result = new WebServiceReturnObject();
-        InputStream is = new URL(url).openStream();
+        InputStream is = null;
         try {
+            is = new URL(url).openStream();
             BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
             StringBuilder sb = new StringBuilder();
             int cp;
@@ -123,13 +125,12 @@ public class WebService {
             //JSONObject json = new JSONObject(jsonText);
             //return json.toString();
         } catch (IOException exception) {
-
+            Log.d("StampIt", exception.getStackTrace().toString());
         }
-        //catch (JSONException exception) {
-
-        //}
         finally{
-            is.close();
+            if(is != null){
+                is.close();
+            }
         }
         return result;
     }

@@ -57,6 +57,7 @@ public class FindCardsMapFragment extends Fragment implements
     private GoogleApiClient mGoogleApiClient;
     private Location lastLocation;
     private LayoutInflater inflater;
+    private static final Location JKU = new Location("");
     public FindCardsMapFragment() {
         // Required empty public constructor
     }
@@ -69,6 +70,8 @@ public class FindCardsMapFragment extends Fragment implements
      */
     // TODO: Rename and change types and number of parameters
     public static FindCardsMapFragment newInstance() {
+        JKU.setLatitude(48.3362284);
+        JKU.setLongitude(14.3178998);
         FindCardsMapFragment fragment = new FindCardsMapFragment();
         Bundle args = new Bundle();
         //args.putString(ARG_PARAM1, param1);
@@ -162,7 +165,10 @@ public class FindCardsMapFragment extends Fragment implements
             lastLocation = LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
 
-            if(googleMap != null) {
+            if(lastLocation == null) {
+                lastLocation = JKU;
+            }
+            if(googleMap != null && lastLocation != null) {
                 LatLng lastLoc = new LatLng(lastLocation.getLatitude(),lastLocation.getLongitude());
                 // Move the camera instantly to hamburg with a zoom of 15.
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastLoc, 15));

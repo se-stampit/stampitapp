@@ -45,6 +45,8 @@ public class CardManager {
     private CardManager() {
         mycards.addAll(getDummyCards());
         availableCompanies.addAll(getDummyCompanies());
+
+        LoadStampCardsFromServer();
     }
     public List<StampCard> GetMyCards() {
        return mycards;
@@ -91,6 +93,7 @@ public class CardManager {
         stampCards.add(new StampCard(UUID.randomUUID().toString(),"Pizza",comp1, "Eine gratis Pizza",10,0,new Date(), new Date(), 100000,false));
         return stampCards;
     }
+    /*
     public boolean addStampCard(StampCard stampCard)
     {
         for (StampCard c : mycards) {
@@ -101,7 +104,8 @@ public class CardManager {
         mycards.add(stampCard);
         return true;
     }
-    public boolean addStamp(String qrCode){
+    */
+    public boolean AddStamp(String qrCode){
         if(qrCode.isEmpty())
             return false;
 
