@@ -11,6 +11,9 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
@@ -48,10 +51,10 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         // dummy username for testing purposes
-        Intent i = new Intent(getApplicationContext(), MainActivity.class);
-        i.putExtra("username", "Benjamin Harvey");
-        username = "Benjamin Harvey";
-        startActivity(i);
+     //  Intent i = new Intent(getApplicationContext(), MainActivity.class);
+        //i.putExtra("username", "Benjamin Harvey");
+        //username = "Benjamin Harvey";
+        //startActivity(i);
 
 
         mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);
@@ -61,7 +64,10 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
             mSignInProgress = savedInstanceState.getInt(
                     SAVED_PROGRESS, STATE_DEFAULT);
         }
+
+
         mGoogleApiClient = buildGoogleApiClient();
+
     }
     private GoogleApiClient buildGoogleApiClient()
     {
@@ -76,7 +82,7 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
     protected void onStart()
     {
         super.onStart();
-        //mGoogleApiClient.connect();
+        mGoogleApiClient.connect();
     }
 
     @Override
@@ -100,6 +106,7 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
     @Override
     public void onClick(View v)
     {
+
         if (!mGoogleApiClient.isConnecting())
         {
             switch (v.getId())
@@ -118,13 +125,15 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
 
         Person currentUser = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
         username = currentUser.getDisplayName();
-        Toast toast = Toast.makeText(getApplicationContext(),
-                "Welcome " + username, Toast.LENGTH_LONG);
 
-        toast.setGravity(Gravity.CENTER, 0, -150);
+        Toast toast = Toast.makeText(getApplicationContext(),
+                "Welcome " + username + "ID:" + currentUser.getId(), Toast.LENGTH_LONG);
         toast.show();
+
+
         mSignInProgress = STATE_DEFAULT;
-        //Show Main Activity after successfull Login
+        Intent i = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(i);
         finish();
     }
 
@@ -211,4 +220,5 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
         //Intent intent = new Intent(getApplicationContext(), SplashScreen.class);
         //startActivity(intent);
     }
+
 }

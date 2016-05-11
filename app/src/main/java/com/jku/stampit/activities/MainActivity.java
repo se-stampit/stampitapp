@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
         // Intent i = new Intent(getApplicationContext(),ScanActivity.class);
         //i.putExtra("username", user.getDisplayName());
         //  startActivity(i);
-
+      
         IntentIntegrator integrator = new IntentIntegrator(this);
         integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES);
         integrator.setPrompt("Scan a QR Code");
@@ -167,6 +167,9 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        }
+        if(id == R.id.action_logout){
+          //Disconnect
         }
 
         return super.onOptionsItemSelected(item);
