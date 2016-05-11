@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
                     IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
                     String QrCode = scanResult.getContents();
                     Toast.makeText(getApplication(),QrCode,Toast.LENGTH_LONG).show();
-                    CardManager.getInstance().addStamp(QrCode);
+                    CardManager.getInstance().ScanStamp(QrCode);
 
 
                 } else {

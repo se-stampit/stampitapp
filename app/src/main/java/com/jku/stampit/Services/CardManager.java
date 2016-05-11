@@ -52,7 +52,8 @@ public class CardManager {
         mycards.addAll(getDummyCards());
         availableCompanies.addAll(getDummyCompanies());
 
-        LoadStampCardsFromServer();
+        LoadMyStampCardsFromServer();
+        LoadProvidersFromServer();
     }
     public List<StampCard> GetMyCards() {
        return mycards;
@@ -111,10 +112,9 @@ public class CardManager {
         return true;
     }
     */
-    public boolean AddStamp(String qrCode){
+    public boolean ScanStamp(String qrCode){
         if(qrCode.isEmpty())
             return false;
-
 
         if(Utils.HasInternetConnection(StampItApplication.getContext())) {
             Map<String,String> header = new HashMap<String,String>();
@@ -125,7 +125,7 @@ public class CardManager {
             try {
                 json = mapper.writeValueAsString(code);
                 Log.d(this.getClass().toString(), "JsonString:\r\n" + json);
-            WebService.WebServiceReturnObject ret = WebService.getInstance().PostString(Constants.AddStampURL,header,json);
+            WebService.WebServiceReturnObject ret = WebService.getInstance().PostString(Constants.ScanStampURL,header,json);
 
             //Check if connection was successfull
             if(ret.getStatusCode() == Constants.HTTP_RESULT_OK) {
@@ -185,16 +185,44 @@ public class CardManager {
         }
         return null;
     }
-    public void LoadStampCardsFromServer() {
+    public void LoadMyStampCardsFromServer() {
+        ObjectMapper jsonMapper = new ObjectMapper();
+        WebService.WebServiceReturnObject result;
+        if(Utils.HasInternetConnection(StampItApplication.getContext())){
+            try {
+                result = WebService.getInstance().GetJSON(Constants.GetMyStampCardsURL);
+                if(result.getStatusCode() != Constants.HTTP_RESULT_OK) {
+                    String tmp = result.getReturnString();
+                }
+
+                List<CompanyDTO> tmp = (List<CompanyDTO>)jsonMapper.readValue(result.getReturnString(), CompanyDTO.class);
+
+                for (CompanyDTO comp : tmp) {
+                    String s = comp.getCompanyName();
+                    String s1 = comp.getDescription();
+                }
+                //TODO Cast result to specific type and provide cards, where do i get card informations?
+                //this.availableStampCards.clear();
+                //this.availableStampCards.addAll(tmp);
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+       else {
+            String s = "No internet connection";
+        }
+    }
+    public void LoadProvidersFromServer() {
         ObjectMapper jsonMapper = new ObjectMapper();
         WebService.WebServiceReturnObject result;
         try {
-            result = WebService.getInstance().GetJson(Constants.GetStampItProvidersURL);
+            result = WebService.getInstance().GetJSON(Constants.GetStampItProvidersURL);
             if(result.getStatusCode() != Constants.HTTP_RESULT_OK) {
-                String tmp = result.getReturnDataString();
+                String tmp = result.getReturnString();
             }
 
-            List<CompanyDTO> tmp = (List<CompanyDTO>)jsonMapper.readValue(result.getReturnDataString(), CompanyDTO.class);
+            List<CompanyDTO> tmp = (List<CompanyDTO>)jsonMapper.readValue(result.getReturnString(), CompanyDTO.class);
 
             //TODO Cast result to specific type and provide cards, where do i get card informations?
             //this.availableStampCards.clear();

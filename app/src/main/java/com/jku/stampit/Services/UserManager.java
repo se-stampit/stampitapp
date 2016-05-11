@@ -41,7 +41,7 @@ public class UserManager {
             if(result.getStatusCode() != Constants.HTTP_RESULT_OK)
                 return false;
 
-            this.sessionToken = jsonMapper.readValue(result.getReturnDataString(), SessionTokenDTO.class).getSessionToken();
+            this.sessionToken = jsonMapper.readValue(result.getReturnString(), SessionTokenDTO.class).getSessionToken();
             //TODO get user information
 
         }

@@ -51,10 +51,10 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         // dummy username for testing purposes
-     //  Intent i = new Intent(getApplicationContext(), MainActivity.class);
+     Intent i = new Intent(getApplicationContext(), MainActivity.class);
         //i.putExtra("username", "Benjamin Harvey");
         //username = "Benjamin Harvey";
-        //startActivity(i);
+        startActivity(i);
 
 
         mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);

@@ -6,7 +6,8 @@ package com.jku.stampit.utils;
 public class Constants {
 
     //Schnittstelle
-    public static final String ServerURL = "https://stampit.azurewebsites.net/api";
+    //public static final String ServerURL = "https://stampit.azurewebsites.net/api";
+    public static final String ServerURL = "http://stampit.azurewebsites.net/api";
     public static final String ScanStampURL = ServerURL + "/me/scan";
     public static final String GetUserDetailURL = ServerURL + "/me";
     public static final String GetMyStampCardsURL = ServerURL + "/me/stampcard";
