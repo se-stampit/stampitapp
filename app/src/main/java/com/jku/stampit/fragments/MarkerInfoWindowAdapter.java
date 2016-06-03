@@ -30,11 +30,11 @@ public class MarkerInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
     @Override
     public View getInfoContents(Marker marker) {
 
-        View popup=inflater.inflate(R.layout.marker_popup, null);
+        View popup=inflater.inflate(R.layout.marker_popup_store, null);
         Company comp = CardManager.getInstance().GetCompanyForID(marker.getTitle());
         Store store = null;
         TextView tvTitle =(TextView)popup.findViewById(R.id.title);
-        TextView tvSnippet =(TextView)popup.findViewById(R.id.snippet);
+        //TextView tvSnippet =(TextView)popup.findViewById(R.id.snippet);
         ImageView img = (ImageView) popup.findViewById(R.id.icon);
         for (Store st : comp.getStores()) {
             if(st.getId() == marker.getSnippet()) {
@@ -46,7 +46,7 @@ public class MarkerInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
             img.setImageBitmap(comp.getImage());
         }
         if(store != null){
-            tvSnippet.setText(store.getAddress());
+          //  tvSnippet.setText(store.getAddress());
         }
 
         return(popup);

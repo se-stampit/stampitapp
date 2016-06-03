@@ -28,6 +28,7 @@ import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 
 import com.jku.stampit.R;
+import com.jku.stampit.Services.CardManager;
 import com.jku.stampit.utils.Utils;
 
 import java.io.IOException;
@@ -50,6 +51,8 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //Init Cardmanager to get cards and other stuff
+        CardManager.getInstance().LoadMyStampCardsFromServer(null);
         //this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_login);
 
@@ -57,7 +60,7 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         // dummy username for testing purposes
-        //Intent i = new Intent(getApplicationContext(), MainActivity.class);
+        Intent i = new Intent(getApplicationContext(), MainActivity.class);
         //i.putExtra("username", "Benjamin Harvey");
         //username = "Benjamin Harvey";
         //startActivity(i);
@@ -128,7 +131,10 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
                 case R.id.sign_in_button:
                     //resolveSignInError();
 
-                    signIn();
+                    Intent i = new Intent(getApplicationContext(), MainActivity.class);
+                    startActivity(i);
+
+                    //signIn();
                     break;
             }
         }

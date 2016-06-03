@@ -8,7 +8,7 @@ import android.content.Context;
  */
 public class StampItApplication extends Application {
     private static StampItApplication instance;
-
+    public static String APP_PREFERENCES = "StampItPreferences";
     public static StampItApplication getInstance() {
         return instance;
     }

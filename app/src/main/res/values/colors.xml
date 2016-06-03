@@ -9,7 +9,7 @@
     <color name="lightblue500">#03A9F4</color>
     <color name="lightblue700">#0288D1</color>
     <color name="white">#FFFFFF</color>
-
+    <color name="black">#000000</color>
     <color name="lightblueA100">#80D8FF</color>
     <color name="lightblueA200">#40C4FF</color>
     <color name="lightblueA400">#00B0FF</color>

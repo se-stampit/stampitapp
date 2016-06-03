@@ -1,15 +1,19 @@
 package com.jku.stampit.fragments;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.jku.stampit.R;
 import com.jku.stampit.Services.CardManager;
+import com.jku.stampit.controls.StampView;
+import com.jku.stampit.data.Company;
 import com.jku.stampit.data.StampCard;
 
 /**
@@ -56,6 +60,28 @@ public class CardFragment extends Fragment {
         if (getArguments() != null) {
             card = CardManager.getInstance().GetMyCardForID(getArguments().getString(ARG_CardId));
         }
+
+        /*
+        card = CardManager.getInstance().GetMyCardForID(cid);
+
+        TextView stampInfo = (TextView) findViewById(R.id.card_detailInfo);
+        stampInfo.setText(card.getCurrentStampCount() + " / " + card.getRequiredStampCount());
+
+        Company comp = card.getCompany();
+        TextView bonus = (TextView) findViewById(R.id.card_bonus);
+        TextView storeAddress = (TextView) findViewById(R.id.card_store_adress);
+
+        if(comp != null) {
+            storeAddress.setText(comp.getCompanyAddress());
+            bonus.setText(comp.getDescription());
+        }
+
+        stampView = (StampView)findViewById(R.id.stampView);
+        if(card != null){
+            stampView.setCircleCount(card.getRequiredStampCount());
+            stampView.setBackgroundColor(Color.BLUE);
+        }
+        */
     }
 
     @Override

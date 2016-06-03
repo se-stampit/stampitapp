@@ -1,6 +1,7 @@
 package com.jku.stampit.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,6 +12,9 @@ import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -25,13 +29,19 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.jku.stampit.R;
 import com.jku.stampit.Services.CardManager;
+import com.jku.stampit.activities.CompanyCardsActivity;
+import com.jku.stampit.activities.StampcardDetailActivity;
 import com.jku.stampit.data.Company;
+import com.jku.stampit.data.StampCard;
 import com.jku.stampit.data.Store;
 import com.jku.stampit.utils.Constants;
 import com.jku.stampit.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -42,7 +52,33 @@ import java.util.List;
  * create an instance of this fragment.
  */
 public class FindCardsMapFragment extends Fragment implements
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, GoogleMap.OnMarkerClickListener,GoogleMap.OnInfoWindowClickListener {
+
+    private class CompStore {
+        private String companyID,storeID;
+
+        public String getCompanyID() {
+            return companyID;
+        }
+
+        public void setCompanyID(String companyID) {
+            this.companyID = companyID;
+        }
+
+        public String getStoreID() {
+            return storeID;
+        }
+
+        public void setStoreID(String storeID) {
+            this.storeID = storeID;
+        }
+
+        public CompStore(String compId, String storeId){
+            this.companyID = compId;
+            this.storeID = storeID;
+        }
+    }
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     //private static final String ARG_PARAM1 = "param1";
@@ -58,6 +94,7 @@ public class FindCardsMapFragment extends Fragment implements
     private Location lastLocation;
     private LayoutInflater inflater;
     private static final Location JKU = new Location("");
+    private final Map<String,CompStore> markerCompStoreList = new HashMap<String,CompStore>();
     public FindCardsMapFragment() {
         // Required empty public constructor
     }
@@ -129,7 +166,6 @@ public class FindCardsMapFragment extends Fragment implements
             @Override
             public void onMapReady(GoogleMap map) {
                 googleMap = map;
-                //googleMap.setInfoWindowAdapter(new MarkerInfoWindowAdapter(inflater));
                 LoadStoresFromCompanies(companies);
             }
         });
@@ -162,6 +198,7 @@ public class FindCardsMapFragment extends Fragment implements
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         if (Utils.checkPermission(getContext(), Constants.ACCESS_COARSE_LOCATION)) {
+            final Bundle bundle1 = bundle;
             lastLocation = LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
 
@@ -174,9 +211,57 @@ public class FindCardsMapFragment extends Fragment implements
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastLoc, 15));
                 // Zoom in, animating the camera.
                 googleMap.animateCamera(CameraUpdateFactory.zoomTo(10), 2000, null);
-
+                googleMap.setOnMarkerClickListener(this);
                 Marker myLoc = googleMap.addMarker(new MarkerOptions().position(lastLoc)
                         .title("My Position").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
+
+                //Set this, to receive Click event on shown Info window
+                googleMap.setOnInfoWindowClickListener(this);
+                // Setting a custom info window adapter for the google map
+                googleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+
+                    // Use default InfoWindow frame
+                    @Override
+                    public View getInfoWindow(Marker arg0) {
+                        return null;
+                    }
+
+                    // Defines the contents of the InfoWindow
+                    @Override
+                    public View getInfoContents(Marker arg0) {
+                        final CompStore compStore = getCompStoreforMarker(arg0);
+
+                        if(compStore != null) {
+                            // Getting view from the layout file info_window_layout
+                            View v = getLayoutInflater(bundle1).inflate(R.layout.marker_popup_store, null);
+
+                            Company comp = CardManager.getInstance().GetCompanyForID(compStore.getCompanyID());
+                            Store store = comp.GetStoreForId(compStore.getStoreID());
+
+                            // icon title snippet
+                            ImageView icon = (ImageView) v.findViewById(R.id.icon);
+                            icon.setImageResource(R.drawable.logo);
+
+                            TextView title = (TextView) v.findViewById(R.id.title);
+                            title.setText(comp.getCompanyName());
+
+                            TextView storeName = (TextView) v.findViewById(R.id.comp_store_name);
+                            TextView storeAddress = (TextView) v.findViewById(R.id.comp_store_address);
+
+                            if(store != null){
+                                storeName.setText(store.getName());
+                                storeAddress.setText(store.getAddress());
+                            }
+
+                            // Returning the view containing InfoWindow contents
+                            return v;
+                        } else {
+                            // Getting view from the layout file info_window_layout
+                            View v = getLayoutInflater(bundle1).inflate(R.layout.marker_popup_myposition, null);
+                            return v;
+                        }
+                    }
+                });
             }
         }
     }
@@ -217,10 +302,37 @@ public class FindCardsMapFragment extends Fragment implements
 
                     Marker st = googleMap.addMarker(new MarkerOptions().position(new LatLng(store.getLatitude(),store.getLongitude()))
                             .title(company.getCompanyName()).snippet(store.getAddress()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+
+                    markerCompStoreList.put(st.getId(),new CompStore(company.getId(),store.getId()));
                 }
             }
         }
+    }
+
+    @Override
+    public boolean onMarkerClick(final Marker marker) {
+        marker.showInfoWindow();
+        return true;
+    }
 
 
+    public void onInfoWindowClick(Marker m) {
+        Intent i = new Intent(getContext(), CompanyCardsActivity.class);
+         CompStore compStore = getCompStoreforMarker(m);
+        i.putExtra(CompanyCardsActivity.compIDParameter, compStore.getCompanyID());
+        startActivity(i);
+    }
+
+    private CompStore getCompStoreforMarker(Marker marker) {
+
+        Iterator it = markerCompStoreList.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry)it.next();
+            if(marker.getId().equals(pair.getKey())){
+                return (CompStore)pair.getValue();
+            }
+        }
+
+        return null;
     }
 }

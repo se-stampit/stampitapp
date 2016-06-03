@@ -1,7 +1,11 @@
 package com.jku.stampit.activities;
 
 import android.annotation.TargetApi;
+import android.app.SearchManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -9,16 +13,19 @@ import android.os.Build;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -54,7 +61,6 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
     private ViewPager mViewPager;
     private List<Fragment> tabs = new ArrayList<Fragment>();
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,10 +68,15 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //Crete Taps which should be shown
-        CardListFragment cardList = new CardListFragment();
+        //Create Taps which should be shown
+        //create CardListFragment with my Cards available
+        ArrayList<StampCard> cards = new ArrayList<StampCard>();
+        cards.addAll(CardManager.getInstance().GetMyCards());
+        CardListFragment cardListFrag =  CardListFragment.newInstance(cards);
+
+        //Create FindCardMapsFragment
         FindCardsMapFragment companyMap = FindCardsMapFragment.newInstance();
-        tabs.add(cardList);
+        tabs.add(cardListFrag);
         tabs.add(companyMap);
         //tabs.add(FindCardsMapFragment.newInstance("",""));
 
@@ -79,19 +90,19 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
 
         setUpTabs(mViewPager);
 
-        setTitle("Meine Karten");
+        setTitle(R.string.my_cards);
 
         //Create Floating Action Button for Camera
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(this);
-
+        /*
         CardManager.getInstance().LoadMyStampCardsFromServer(new CardManager.CardManagerCardUpdateCallback() {
             @Override
             public void CardsUpdated(List<StampCard> newCards) {
                 recreate();
             }
         });
-
+        */
     }
     public void onClick(View view) {
         // Intent i = new Intent(getApplicationContext(),ScanActivity.class);
@@ -185,8 +196,21 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu_main, menu);
+
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+
+        SearchManager searchManager = (SearchManager) MainActivity.this.getSystemService(Context.SEARCH_SERVICE);
+
+        SearchView searchView = null;
+        if (searchItem != null) {
+            searchView = (SearchView) searchItem.getActionView();
+        }
+        if (searchView != null) {
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(MainActivity.this.getComponentName()));
+        }
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -197,11 +221,9 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_search) {
+            //TODO implement search of cards
             return true;
-        }
-        if(id == R.id.action_logout){
-          //Disconnect
         }
 
         return super.onOptionsItemSelected(item);
@@ -258,6 +280,6 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
         //void onListFragmentInteraction(DummyContent.DummyItem item);
         //Toast.makeText(getActivity(), "this is my Toast message!!! =)",
         //Toast.LENGTH_LONG).show();
-    }
 
+    }
 }

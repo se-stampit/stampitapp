@@ -10,8 +10,25 @@
         <item name="colorPrimaryDark">@color/lightblue700</item>
         <item name="colorAccent">@color/lightblueA100</item>
         <item name="android:titleTextStyle">@style/FontHeadline</item>
-
+        <item name="android:actionBarStyle">@style/ActionbarStyle</item>
     </style>
+
+    <style name="MyTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <!--We will be using the toolbar so no need to show ActionBar-->
+        <item name="android:windowActionBar">false</item>
+        <!-- Set theme colors from http://www.google.com/design/spec/style/color.html#color-color-palette-->
+        <!-- colorPrimary is used for the default action bar background -->
+        <item name="colorPrimary">@color/lightblue100</item>
+        <!-- colorPrimaryDark is used for the status bar -->
+        <item name="colorPrimaryDark">@color/lightblue700</item>
+        <!-- colorAccent is used as the default value for colorControlActivated
+             which is used to tint widgets -->
+        <item name="colorAccent">@color/lightblueA100</item>
+        <!-- You can also set colorControlNormal, colorControlActivated
+           colorControlHighlight and colorSwitchThumbNormal. -->
+    </style>
+
 
     <style name="FullScreen" parent="AppTheme">
         <!--<item name="android:theme">@style/Theme.AppCompat.NoActionBar</item>-->
@@ -28,12 +45,14 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="ActionbarStyle" parent="ThemeOverlay.AppCompat.Dark.ActionBar" >
+       <item name="android:background">@color/lightblue500</item>
+    </style>
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
     <style name="FontHeadline" parent="@android:style/Widget.TextView">
-        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:fontFamily">fonts/Roboto-Regular.ttf</item>
         <item name="android:textSize">24sp</item>
     </style>
     <style name="FontSubheading" parent="@android:style/Widget.TextView">

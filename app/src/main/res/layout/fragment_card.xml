@@ -99,6 +99,8 @@
             android:layout_alignTop="@id/cardcontent"
             android:layout_alignRight="@id/cardcontent"
             android:layout_alignBottom="@id/cardcontent"
-            android:id="@+id/cardinfoimage"/>
+            android:id="@+id/cardinfoimage"
+            android:gravity="center"
+            android:src="@drawable/card_full"/>
     </RelativeLayout>
 </FrameLayout>

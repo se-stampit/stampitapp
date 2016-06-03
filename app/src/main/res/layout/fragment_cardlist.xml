@@ -4,5 +4,5 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:id="@android:id/list"
-    android:background="@color/lightblue700">
+    android:background="@color/white">
 </ListView>

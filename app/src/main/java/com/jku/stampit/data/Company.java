@@ -126,4 +126,13 @@ public class Company {
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    public Store GetStoreForId(String storeId) {
+        for(Store store : stores){
+            if(store.getId().equals(storeId)){
+                return store;
+            }
+        }
+        return null;
+    }
 }

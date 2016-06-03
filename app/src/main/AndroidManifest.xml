@@ -5,21 +5,25 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <!-- Permissions for Camera -->
     <uses-permission android:name="android.permission.CAMERA" />
+
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
     <!-- Permissions for Network -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <!-- Permission for Maps -->
-    <permission android:name="com.myapp.android.locationapi.maps.permission.MAPS_RECEIVE" android:protectionLevel="signature" />
+    <permission
+        android:name="com.myapp.android.locationapi.maps.permission.MAPS_RECEIVE"
+        android:protectionLevel="signature" />
+
     <uses-permission android:name="com.myapp.android.locationapi.maps.permission.MAPS_RECEIVE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
-    <!-- android.support.multidex.MultiDexApplication-->
+    <!-- android.support.multidex.MultiDexApplication -->
     <application
-        android:name="com.jku.stampit.StampItApplication"
+        android:name=".StampItApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -35,15 +39,34 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".activities.StampcardDetailActivity"
+            android:parentActivityName=".activities.MainActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.MainActivity" />
+        </activity>
+        <activity
+            android:name=".activities.CompanyCardsActivity"
+            android:parentActivityName=".activities.MainActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.MainActivity" />
+        </activity>
+        <activity
             android:name=".activities.MainActivity"
             android:label="@string/title_activity_main"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".activities.ScanActivity" />
-
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
 
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyB3u0TxlNmPtCTYZX_lIt-ir00dztUth54" />
+
 
     </application>
 

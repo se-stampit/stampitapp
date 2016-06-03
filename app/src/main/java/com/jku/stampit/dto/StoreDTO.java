@@ -6,9 +6,16 @@ import java.util.Date;
  * Created by Andreas on 09.05.16.
  */
 public class StoreDTO {
-    private String id,companyId,address;
+    private String id,companyId,address, name;
     private Date createdAt,updatedAt;
     private Double latitude,longitude;
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getId() {
         return id;

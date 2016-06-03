@@ -12,4 +12,10 @@
             <attr name="font" format="string" />
             <attr name="android:textStyle" />
      </declare-styleable>
+    <declare-styleable name="StampView">
+        <attr name="circleColor" format="color" />
+        <attr name="circleBorderColor" format="color" />
+        <attr name="circleCount" format="integer" />
+        <attr name="filledCircleCount" format="integer" />
+    </declare-styleable>
 </resources>
