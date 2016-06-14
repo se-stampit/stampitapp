@@ -15,6 +15,7 @@ import com.jku.stampit.data.Company;
 import com.jku.stampit.data.Store;
 import com.jku.stampit.dto.CardDTO;
 import com.jku.stampit.dto.CompanyDTO;
+import com.jku.stampit.dto.CountDTO;
 import com.jku.stampit.dto.StampCodeDTO;
 import com.jku.stampit.utils.Constants;
 import com.jku.stampit.utils.Utils;
@@ -81,15 +82,16 @@ public class CardManager {
         mycards.addAll(getDummyCards());
         availableCompanies.addAll(getDummyCompanies());
 
+        Log.d("Cardmanager", "constructor call");
         //LoadMyStampCardsFromServer();
-        //LoadProvidersFromServer();
+        LoadProvidersFromServer();
         settings = StampItApplication.getContext().getSharedPreferences(StampItApplication.APP_PREFERENCES, 0);
-        unverifiedStampTokens.addAll(settings.getStringSet(UNVERIFIED_STAMPES_KEY,new HashSet<String>()));
+        unverifiedStampTokens.addAll(settings.getStringSet(UNVERIFIED_STAMPES_KEY, new HashSet<String>()));
     }
 
     public void SaveSettings() {
         SharedPreferences.Editor editor = settings.edit();
-        editor.putStringSet(UNVERIFIED_STAMPES_KEY,unverifiedStampTokens);
+        editor.putStringSet(UNVERIFIED_STAMPES_KEY, unverifiedStampTokens);
     }
     public List<StampCard> GetMyCards() {
        return mycards;
@@ -164,7 +166,7 @@ public class CardManager {
 
             if (Utils.HasInternetConnection(StampItApplication.getContext())) {
 
-                new HttpPostJsonRequest(null) {
+                new HttpPostJsonRequest(header) {
                     @Override
                     protected void onPostExecute(WebserviceReturnObject result) {
                         if (result.getStatusCode() == Constants.HTTP_RESULT_OK) {
@@ -257,16 +259,75 @@ public class CardManager {
         }
         return newCards;
     }
+    private List<Company> getCompanyList(List<CompanyDTO> companies) {
+        List<Company> newCompanies = new ArrayList<Company>();
+//(String id, String blobId,String companyName,String companyAddress,String contactName,String contactMail,String description,Date createdAt,Date updatedAt)
+
+        for(CompanyDTO c : companies){
+            Company company = new Company(c.getId(),c.getBlobId(),c.getCompanyName(),c.getCompanyAddress(),c.getContactName(),c.getContactMail(),c.getDescription(),c.getCreatedAt(),c.getUpdatedAt());
+            newCompanies.add(company);
+        }
+        return newCompanies;
+    }
     public void LoadProvidersFromServer() {
+        Log.d("LoadProvider","begin of method");
         ObjectMapper jsonMapper = new ObjectMapper();
         WebserviceReturnObject result;
         try {
+
+            new HttpGetJsonRequest(){
+                @Override
+                protected void onPostExecute(WebserviceReturnObject result) {
+                    if(result.getStatusCode() != Constants.HTTP_RESULT_OK) {
+                        String tmp = result.getReturnString();
+                    }
+                    Log.d("LoadProvider", "Count Status Code: " + result.getStatusCode());
+                    ObjectMapper jsonMapper = new ObjectMapper();
+                    try{
+                        if(result.getReturnString() != null && result.getReturnString().length() > 0) {
+                            CountDTO anz = jsonMapper.readValue(result.getReturnString(), CountDTO.class);
+                            Log.d("CardManager", "ProviderCountRequest: " + anz.getCount());
+                            new HttpGetJsonRequest() {
+                                @Override
+                                protected void onPostExecute(WebserviceReturnObject result) {
+                                    if (result.getStatusCode() != Constants.HTTP_RESULT_OK) {
+                                        String tmp = result.getReturnString();
+                                    }
+                                    ObjectMapper jsonMapper = new ObjectMapper();
+                                    try {
+                                        List<CompanyDTO> provider = (List<CompanyDTO>) jsonMapper.readValue(result.getReturnString(), CompanyDTO.class);
+                                        availableCompanies.addAll(getCompanyList(provider));
+                                        Log.d("CardManager", "First Company: " + availableCompanies.get(0));
+                                        LoadCompanyBlobs();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                        Log.e("CardManager", "Abruf der Provider fehlgeschlagen", e);
+                                    }
+                                }
+
+                            }.execute(Constants.GetStampItProvidersURL);
+                        }
+                    } catch(IOException exception) {
+                        String s = exception.getStackTrace().toString();
+                        Log.e("CardManager" ,s , exception);
+                    }
+                    catch(Exception e)
+                    {
+                        e.printStackTrace();
+                        Log.e("CardManager", e.getMessage() + " " + e.getStackTrace().toString());
+                    }
+                }
+            }.execute(Constants.GetStampItProviderCountURL);
+
+            /*
             result = WebService.getInstance().GetJSON(Constants.GetStampItProvidersURL);
             if(result.getStatusCode() != Constants.HTTP_RESULT_OK) {
                 String tmp = result.getReturnString();
             }
 
             List<CompanyDTO> tmp = (List<CompanyDTO>)jsonMapper.readValue(result.getReturnString(), CompanyDTO.class);
+            */
+
 
             //TODO Cast result to specific type and provide cards, where do i get card informations?
             //this.availableStampCards.clear();
@@ -280,5 +341,10 @@ public class CardManager {
     public void ResendUnverifiedTokes(final CardManagerStampUpdateCallback callback){
         //TODO Upload Stamps to Server
         callback.StampsUpdated();
+    }
+    private void LoadCompanyBlobs()
+    {
+
+
     }
 }

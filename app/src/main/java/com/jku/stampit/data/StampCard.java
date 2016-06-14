@@ -23,7 +23,15 @@ import java.util.UUID;
 public class StampCard implements Parcelable {
     private String id;
     private Date createdAt,updatedAt;
-    private String userId,companyId,productName,bonusDescription;
+    private String userId;
+
+    public String getCompanyId() {
+        return companyId;
+    }
+
+    private String companyId;
+    private String productName;
+    private String bonusDescription;
     private int requiredStampCount,maxDuration,currentStampCount;
     private boolean isUsed = false;
     private Company company;

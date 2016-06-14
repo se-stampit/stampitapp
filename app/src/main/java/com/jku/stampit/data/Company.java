@@ -29,6 +29,19 @@ public class Company {
         this.companyName = name;
     }
 
+    public Company(String id, String blobId,String companyName,String companyAddress,String contactName,String contactMail,String description,Date createdAt,Date updatedAt)
+    {
+        this.id = id;
+        this.blobId=blobId;
+        this.companyName = companyName;
+        this.companyAddress = companyAddress;
+        this.contactName = contactName;
+        this.contactMail = contactMail;
+        this.description =description;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+
+    }
     public Bitmap getImage() {
         if(image == null) {
             if(imageBytes != null) {
@@ -39,6 +52,7 @@ public class Company {
         }
         return image;
     }
+
 
     public List<Store> getStores() {
         return stores;
