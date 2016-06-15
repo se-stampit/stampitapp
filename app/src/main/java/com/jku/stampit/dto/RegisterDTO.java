@@ -5,7 +5,7 @@ package com.jku.stampit.dto;
  */
 public class RegisterDTO {
     private String authprovider,token;
-    private UserDTO user;
+    private UserInfo user;
 
     public String getAuthprovider() {
         return authprovider;
@@ -23,11 +23,11 @@ public class RegisterDTO {
         this.token = token;
     }
 
-    public UserDTO getUser() {
+    public UserInfo getUser() {
         return user;
     }
 
-    public void setUser(UserDTO user) {
+    public void setUser(UserInfo user) {
         this.user = user;
     }
 }

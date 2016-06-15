@@ -24,11 +24,14 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.plus.People;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 
 import com.jku.stampit.R;
 import com.jku.stampit.Services.CardManager;
+import com.jku.stampit.Services.UserManager;
+import com.jku.stampit.dto.UserInfo;
 import com.jku.stampit.utils.Utils;
 
 import java.io.IOException;
@@ -56,7 +59,7 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
         //this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_login);
 
-        timesOnHomeScreen=0;
+        timesOnHomeScreen = 0;
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         // dummy username for testing purposes
@@ -67,8 +70,7 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
 
         mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);
         mSignInButton.setOnClickListener(this);
-        if (savedInstanceState != null)
-        {
+        if (savedInstanceState != null) {
             mSignInProgress = savedInstanceState.getInt(
                     SAVED_PROGRESS, STATE_DEFAULT);
         }
@@ -78,8 +80,8 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
         //TODO Check if user already signed in
 
     }
-    private GoogleApiClient buildGoogleApiClient()
-    {
+
+    private GoogleApiClient buildGoogleApiClient() {
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
@@ -122,23 +124,22 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
     }
 */
     @Override
-    public void onClick(View v)
-    {
-        if (!mGoogleApiClient.isConnecting())
-        {
-            switch (v.getId())
-            {
+    public void onClick(View v) {
+        if (!mGoogleApiClient.isConnecting()) {
+            switch (v.getId()) {
                 case R.id.sign_in_button:
+                    Log.d("Login", "Button clicked");
                     //resolveSignInError();
 
-                    Intent i = new Intent(getApplicationContext(), MainActivity.class);
-                    startActivity(i);
+                    //Intent i = new Intent(getApplicationContext(), MainActivity.class);
+                    //startActivity(i);
 
-                    //signIn();
+                    signIn();
                     break;
             }
         }
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -151,16 +152,37 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
     }
 
     private void handleSignInResult(GoogleSignInResult result) {
-        //Log.d(TAG, "handleSignInResult:" + result.isSuccess());
-        if (result.isSuccess()) {
+        Log.d("Login", "handleSignInResult:" + result.isSuccess() + " Status: " + result.getStatus());
+        boolean debug = true;
+        if (result.isSuccess() || debug) {
             // Signed in successfully, show authenticated UI.
-            GoogleSignInAccount acct = result.getSignInAccount();
-            //TODO Send Token to Server
-            String token = result.getSignInAccount().getIdToken();
+            Log.i("LOGIN", "Google signed in succeccfully ");
+            //GoogleSignInAccount acct = result.getSignInAccount();
+
+            String token = "";// = acct.getIdToken();
+            //String[] splitted = acct.getDisplayName().split(" ");
+
+
+            UserInfo userinfo = new UserInfo("","","");// = new UserInfo(splitted[0], splitted[1], acct.getEmail());
+            if (debug) {
+                token = "testToken";
+                userinfo = new UserInfo("Andreas","Lengauer","andreaslengauer94@gmail.com");
+            }
+            UserManager.getInstance().login("google", token, userinfo, new UserManager.UserManagerLoginCallback() {
+                @Override
+                public void LoginSuccessfull() {
+                    updateUI(true);
+                }
+
+                @Override
+                public void LoginFailed() {
+                    updateUI(false);
+                }
+            });
             //mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
             //   mStatusTextView.setText(getString(R.string.auth_google_play_services_client_google_display_name,acct.getDisplayName()));
 
-            updateUI(true);
+            //updateUI(true);
         } else {
             // Signed out, show unauthenticated UI.
             updateUI(false);
@@ -184,6 +206,7 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
             Toast.makeText(getApplicationContext(), "Login fehlgeschlagen", Toast.LENGTH_SHORT).show();
         }
     }
+
     /*
     @Override
     public void onConnected(Bundle connectionHint)
@@ -203,13 +226,15 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
         Intent i = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(i);
         finish();
-    }
+    }@
     */
     private void signIn() {
+        Log.d("Login", "signIN Method was called");
         findViewById(R.id.sign_in_button).setVisibility(View.GONE);
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
+
     private void signOut() {
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
                 new ResultCallback<Status>() {
@@ -221,9 +246,9 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
                     }
                 });
     }
+
     @Override
-    public void onConnectionFailed(ConnectionResult result)
-    {
+    public void onConnectionFailed(ConnectionResult result) {
         /*
         if (mSignInProgress != STATE_IN_PROGRESS)
         {
@@ -236,28 +261,21 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
         */
     }
 
-    private void resolveSignInError()
-    {
-        if (mSignInIntent != null)
-        {
-            try
-            {
+    private void resolveSignInError() {
+        if (mSignInIntent != null) {
+            try {
                 mSignInProgress = STATE_IN_PROGRESS;
                 startIntentSenderForResult(
                         mSignInIntent.getIntentSender(), 0,
                         null, 0, 0, 0);
-            }
-            catch (IntentSender.SendIntentException e)
-            {
+            } catch (IntentSender.SendIntentException e) {
                 Log.i("Log error",
                         "Sign in intent could not be sent: "
                                 + e.getLocalizedMessage());
                 mSignInProgress = STATE_SIGN_IN;
                 mGoogleApiClient.connect();
             }
-        }
-        else
-        {
+        } else {
             Toast.makeText(getApplicationContext(),
                     "Error signing in", Toast.LENGTH_SHORT)
                     .show();
@@ -265,8 +283,7 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
     }
 
     @Override
-    public void onBackPressed()
-    {
+    public void onBackPressed() {
         //TODO do we need back?
         //Intent intent = new Intent(getApplicationContext(), SplashScreen.class);
         //startActivity(intent);

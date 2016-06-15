@@ -9,9 +9,17 @@ public class UserDTO {
     private String id, firstName, lastName, mailAddress;
     private Date createdAt, updatedAt;
 
+    public UserDTO (String id, String firstName,String lastName,String mailAddress)
+    {
+        this.id=id;
+        this.firstName=firstName;
+        this.lastName=lastName;
+        this.mailAddress=mailAddress;
+    }
     public String getId() {
         return id;
     }
+
 
     public void setId(String id) {
         this.id = id;
