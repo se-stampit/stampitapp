@@ -23,6 +23,7 @@ import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -43,7 +44,7 @@ import com.jku.stampit.utils.Constants;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements  View.OnClickListener, FindCardsMapFragment.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements  View.OnClickListener, FindCardsMapFragment.OnFragmentInteractionListener, SearchView.OnQueryTextListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -60,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
      */
     private ViewPager mViewPager;
     private List<Fragment> tabs = new ArrayList<Fragment>();
-
+    private CardListFragment cardListFrag;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
         //create CardListFragment with my Cards available
         ArrayList<StampCard> cards = new ArrayList<StampCard>();
         cards.addAll(CardManager.getInstance().GetMyCards());
-        CardListFragment cardListFrag =  CardListFragment.newInstance(cards);
+        cardListFrag =  CardListFragment.newInstance(cards);
 
         //Create FindCardMapsFragment
         FindCardsMapFragment companyMap = FindCardsMapFragment.newInstance();
@@ -208,6 +209,9 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
             searchView = (SearchView) searchItem.getActionView();
         }
         if (searchView != null) {
+            //searchView.setIconifiedByDefault(false);
+            searchView.setOnQueryTextListener(this);
+            //searchView.setSubmitButtonEnabled(true);
             searchView.setSearchableInfo(searchManager.getSearchableInfo(MainActivity.this.getComponentName()));
         }
         return super.onCreateOptionsMenu(menu);
@@ -281,5 +285,18 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
         //Toast.makeText(getActivity(), "this is my Toast message!!! =)",
         //Toast.LENGTH_LONG).show();
 
+    }
+    public boolean onQueryTextChange(String newText) {
+
+        if (TextUtils.isEmpty(newText)) {
+            cardListFrag.getListView().clearTextFilter();
+        } else {
+            cardListFrag.getListView().setFilterText(newText);
+        }
+        return true;
+    }
+
+    public boolean onQueryTextSubmit(String query) {
+        return false;
     }
 }

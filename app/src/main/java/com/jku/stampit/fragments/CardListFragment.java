@@ -49,6 +49,9 @@ public class CardListFragment extends ListFragment {
         Bundle bundleArgs = getArguments();
         if(bundleArgs != null) {
             cards = bundleArgs.getParcelableArrayList(ARG_CardListID);
+            cardListAdapter = new CardListAdapter(getActivity().getApplicationContext(),cards);
+            setListAdapter(cardListAdapter);
+            cardListAdapter.setNotifyOnChange(true);
         }
 
         receiver = new BroadcastReceiver() {
@@ -66,6 +69,10 @@ public class CardListFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_cardlist,container,false);
+        ListView listview = (ListView) rootView.findViewById(R.id.cardlistView);
+        if (listview != null) {
+            listview.setTextFilterEnabled(true);
+        }
         return rootView;
 
     }
@@ -87,9 +94,6 @@ public class CardListFragment extends ListFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-        cardListAdapter = new CardListAdapter(getActivity().getApplicationContext(),cards);
-        setListAdapter(cardListAdapter);
     }
 
     @Override

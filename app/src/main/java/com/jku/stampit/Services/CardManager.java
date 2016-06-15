@@ -84,7 +84,7 @@ public class CardManager {
 
         Log.d("Cardmanager", "constructor call");
         //LoadMyStampCardsFromServer();
-        LoadProvidersFromServer();
+        //LoadProvidersFromServer();
         settings = StampItApplication.getContext().getSharedPreferences(StampItApplication.APP_PREFERENCES, 0);
         unverifiedStampTokens.addAll(settings.getStringSet(UNVERIFIED_STAMPES_KEY, new HashSet<String>()));
     }
