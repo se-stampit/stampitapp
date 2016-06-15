@@ -6,30 +6,88 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.jku.stampit.R;
 import com.jku.stampit.data.StampCard;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by user on 04/05/16.
  */
-public class CardListAdapter extends ArrayAdapter<StampCard> {
+public class CardListAdapter extends ArrayAdapter<StampCard>  implements Filterable {
     private final Context context;
+    private final List<StampCard> orig;
     private final List<StampCard> values;
     public CardListAdapter(Context context, List<StampCard> cards) {
         super(context, 0, cards);
         this.context = context;
-        this.values = cards;
+        this.orig = new ArrayList<StampCard>();
+        this.orig.addAll(cards);
+        this.values = new ArrayList<StampCard>();
+        this.values.addAll(cards);
     }
     public void SetCards(List<StampCard> newCards){
-        values.clear();
-        values.addAll(newCards);
+        orig.clear();
+        orig.addAll(newCards);
         notifyDataSetChanged();
     }
+
+    @Override
+    public int getCount() {
+        return values.size();
+    }
+
+    @Override
+    public StampCard getItem(int position) {
+        return values.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    public Filter getFilter() {
+        return new Filter() {
+
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                final FilterResults oReturn = new FilterResults();
+                final ArrayList<StampCard> results = new ArrayList<StampCard>();
+                String constr = constraint.toString().toLowerCase();
+                if (constraint != null && constraint != "") {
+                    if (orig != null && orig.size() > 0) {
+                        for (final StampCard cd : orig) {
+                            if (cd.getProductName().toLowerCase()
+                                    .contains(constr))
+                                results.add(cd);
+                        }
+                    }
+                } else {
+                    if(orig != null)
+                        results.addAll(orig);
+                }
+                oReturn.values = results;
+                return oReturn;
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            protected void publishResults(CharSequence constraint,
+                                          FilterResults results) {
+                values.clear();
+                values.addAll((ArrayList<StampCard>) results.values);
+                notifyDataSetChanged();
+            }
+        };
+    }
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         // Get the data item for this position
