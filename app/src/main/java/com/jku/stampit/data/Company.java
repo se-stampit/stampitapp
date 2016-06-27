@@ -17,11 +17,14 @@ import com.jku.stampit.R;
  * A Companies Information is stored
  */
 public class Company {
-    private String id,blobId,companyName,companyAddress,contactName,contactMail;
+    private String id,blobId,companyName,companyAddress,contactName;
     private String description;
     private Date createdAt, updatedAt;
 
     private Bitmap image;
+
+
+
     private byte[] imageBytes;
     private final List<Store> stores = new ArrayList<Store>();
     public Company(String id, String name, byte[] imageBytes) {
@@ -29,14 +32,13 @@ public class Company {
         this.companyName = name;
     }
 
-    public Company(String id, String blobId,String companyName,String companyAddress,String contactName,String contactMail,String description,Date createdAt,Date updatedAt)
+    public Company(String id, String blobId,String companyName,String companyAddress,String contactName,String description,Date createdAt,Date updatedAt)
     {
         this.id = id;
         this.blobId=blobId;
         this.companyName = companyName;
         this.companyAddress = companyAddress;
         this.contactName = contactName;
-        this.contactMail = contactMail;
         this.description =description;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -85,7 +87,13 @@ public class Company {
         }
         return companyName;
     }
+    public byte[] getImageBytes() {
+        return imageBytes;
+    }
 
+    public void setImageBytes(byte[] imageBytes) {
+        this.imageBytes = imageBytes;
+    }
     public void setCompanyName(String companyName) {
         this.companyName = companyName;
     }
@@ -108,7 +116,7 @@ public class Company {
     public void setContactName(String contactName) {
         this.contactName = contactName;
     }
-
+/*
     public String getContactMail() {
         return contactMail;
     }
@@ -116,7 +124,7 @@ public class Company {
     public void setContactMail(String contactMail) {
         this.contactMail = contactMail;
     }
-
+*/
     public String getDescription() {
         return description;
     }

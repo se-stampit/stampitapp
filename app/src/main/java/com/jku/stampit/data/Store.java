@@ -6,11 +6,11 @@ import java.util.Date;
  * Created by user on 09/05/16.
  */
 public class Store {
-    private String id,companyId,address,name;
+    private String id,companyId,address;
     private Date createdAt,updatedAt;
     private double latitude,longitude;
 
-    public Store(String id, String companyId,String name, String address, Date createdAt, Date updatedAt, double latitude, double longitude) {
+    public Store(String id, String companyId, String address, Date createdAt, Date updatedAt, double latitude, double longitude) {
         this.id = id;
         this.companyId = id;
         this.address = address;
@@ -18,16 +18,7 @@ public class Store {
         this.updatedAt = updatedAt;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.name = name;
     }
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getId() {
         return id;
     }

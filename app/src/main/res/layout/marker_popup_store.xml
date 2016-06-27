@@ -40,11 +40,12 @@
             android:layout_height="wrap_content"
             android:textSize="15sp"/>
     </LinearLayout>
+    <!--
     <Button
         android:id="@+id/btn_showCompany"
         android:text="@string/moreInfo"
         android:clickable="true"
         android:layout_gravity="center_horizontal"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"/>-->
 </LinearLayout>

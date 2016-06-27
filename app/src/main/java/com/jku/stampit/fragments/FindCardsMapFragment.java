@@ -240,8 +240,8 @@ public class FindCardsMapFragment extends Fragment implements
 
                             // icon title snippet
                             ImageView icon = (ImageView) v.findViewById(R.id.icon);
-                            icon.setImageResource(R.drawable.logo);
-
+                            //icon.setImageResource(R.drawable.logo);
+                            icon.setImageBitmap(comp.getImage());
                             TextView title = (TextView) v.findViewById(R.id.title);
                             title.setText(comp.getCompanyName());
 
@@ -249,7 +249,7 @@ public class FindCardsMapFragment extends Fragment implements
                             TextView storeAddress = (TextView) v.findViewById(R.id.comp_store_address);
 
                             if(store != null){
-                                storeName.setText(store.getName());
+                                storeName.setText(comp.getCompanyName());
                                 storeAddress.setText(store.getAddress());
                             }
 

@@ -7,7 +7,7 @@ import java.util.Date;
  *  DTO to transfer Object between server and application
  */
 public class CompanyDTO {
-    private String id,blobId,companyName,companyAddress,contactName,contactMail;
+    private String id,blobId,companyName,companyAddress,contactName;
     private String description;
     private Date createdAt, updatedAt;
 
@@ -50,7 +50,7 @@ public class CompanyDTO {
     public void setContactName(String contactName) {
         this.contactName = contactName;
     }
-
+/*
     public String getContactMail() {
         return contactMail;
     }
@@ -58,7 +58,7 @@ public class CompanyDTO {
     public void setContactMail(String contactMail) {
         this.contactMail = contactMail;
     }
-
+*/
     public String getDescription() {
         return description;
     }

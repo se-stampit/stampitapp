@@ -7,6 +7,8 @@ public class WebserviceReturnObject {
     private int statusCode = -1;
     private String returnString = "";
 
+    private byte[] bytes;
+
     public String getReturnString() {
         return returnString;
     }
@@ -22,5 +24,11 @@ public class WebserviceReturnObject {
     public void setStatusCode(int statusCode) {
         this.statusCode = statusCode;
     }
+    public byte[] getBytes() {
+        return bytes;
+    }
 
+    public void setBytes(byte[] bytes) {
+        this.bytes = bytes;
+    }
 }

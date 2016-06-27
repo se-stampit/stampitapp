@@ -17,6 +17,7 @@ import com.jku.stampit.dto.CardDTO;
 import com.jku.stampit.dto.CompanyDTO;
 import com.jku.stampit.dto.CountDTO;
 import com.jku.stampit.dto.StampCodeDTO;
+import com.jku.stampit.dto.StoreDTO;
 import com.jku.stampit.utils.Constants;
 import com.jku.stampit.utils.Utils;
 
@@ -80,11 +81,11 @@ public class CardManager {
         mapper = new ObjectMapper();
         broadcaster = LocalBroadcastManager.getInstance(StampItApplication.getContext());
         //mycards.addAll(getDummyCards());
-        availableCompanies.addAll(getDummyCompanies());
+        //availableCompanies.addAll(getDummyCompanies());
 
         Log.d("Cardmanager", "constructor call");
         //LoadMyStampCardsFromServer();
-        //LoadProvidersFromServer();
+        LoadProvidersFromServer();
         settings = StampItApplication.getContext().getSharedPreferences(StampItApplication.APP_PREFERENCES, 0);
         unverifiedStampTokens.addAll(settings.getStringSet(UNVERIFIED_STAMPES_KEY, new HashSet<String>()));
     }
@@ -99,7 +100,7 @@ public class CardManager {
     public List<Company> GetAvailableCompanies() {
         return availableCompanies;
     }
-
+/*
     private List<Company> getDummyCompanies() {
         List<Company> dummyCompanies = new ArrayList<Company>();
 
@@ -126,6 +127,7 @@ public class CardManager {
         comp1.AddStore(st7);
         return dummyCompanies;
     }
+    */
     private List<StampCard> getDummyCards() {
 
         Company comp = new Company(UUID.randomUUID().toString(),"FUSSAL",null);
@@ -235,6 +237,7 @@ public class CardManager {
                 }
                 ObjectMapper jsonMapper = new ObjectMapper();
                 try{
+                    String res = result.getReturnString();
                     List<CardDTO> cards = mapper.readValue(result.getReturnString(),
                             TypeFactory.defaultInstance().constructCollectionType(List.class,
                                     CardDTO.class));
@@ -250,6 +253,15 @@ public class CardManager {
         }.execute(Constants.GetMyStampCardsURL);
 
     }
+    private List<Store> getStoreList(List<StoreDTO> stores) {
+        List<Store> newStores = new ArrayList<Store>();
+
+        for(StoreDTO st : stores){
+            Store store = new Store(st.getId(),st.getCompanyId(),st.getAddress(),st.getCreatedAt(),st.getUpdatedAt(),st.getLatitude(),st.getLongitude());
+            newStores.add(store);
+        }
+        return newStores;
+    }
     private List<StampCard> getStampCardList(List<CardDTO> cards) {
         List<StampCard> newCards = new ArrayList<StampCard>();
 
@@ -264,7 +276,7 @@ public class CardManager {
 //(String id, String blobId,String companyName,String companyAddress,String contactName,String contactMail,String description,Date createdAt,Date updatedAt)
 
         for(CompanyDTO c : companies){
-            Company company = new Company(c.getId(),c.getBlobId(),c.getCompanyName(),c.getCompanyAddress(),c.getContactName(),c.getContactMail(),c.getDescription(),c.getCreatedAt(),c.getUpdatedAt());
+            Company company = new Company(c.getId(),c.getBlobId(),c.getCompanyName(),c.getCompanyAddress(),c.getContactName(),c.getDescription(),null,null);
             newCompanies.add(company);
         }
         return newCompanies;
@@ -294,16 +306,19 @@ public class CardManager {
                                     }
                                     ObjectMapper jsonMapper = new ObjectMapper();
                                     try {
-                                        List<CompanyDTO> provider = (List<CompanyDTO>) jsonMapper.readValue(result.getReturnString(), CompanyDTO.class);
+                                        String res = result.getReturnString();
+                                        List<CompanyDTO> provider = mapper.readValue(result.getReturnString(),
+                                                TypeFactory.defaultInstance().constructCollectionType(List.class,
+                                                        CompanyDTO.class));
                                         availableCompanies.addAll(getCompanyList(provider));
                                         Log.d("CardManager", "First Company: " + availableCompanies.get(0));
                                         LoadCompanyBlobs();
+                                        LoadStoresForCompanyies();
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                         Log.e("CardManager", "Abruf der Provider fehlgeschlagen", e);
                                     }
                                 }
-
                             }.execute(Constants.GetStampItProvidersURL);
                         }
                     } catch(IOException exception) {
@@ -317,20 +332,6 @@ public class CardManager {
                     }
                 }
             }.execute(Constants.GetStampItProviderCountURL);
-
-            /*
-            result = WebService.getInstance().GetJSON(Constants.GetStampItProvidersURL);
-            if(result.getStatusCode() != Constants.HTTP_RESULT_OK) {
-                String tmp = result.getReturnString();
-            }
-
-            List<CompanyDTO> tmp = (List<CompanyDTO>)jsonMapper.readValue(result.getReturnString(), CompanyDTO.class);
-            */
-
-
-            //TODO Cast result to specific type and provide cards, where do i get card informations?
-            //this.availableStampCards.clear();
-            //this.availableStampCards.addAll(tmp);
         }
         catch(Exception e){
             e.printStackTrace();
@@ -343,7 +344,84 @@ public class CardManager {
     }
     private void LoadCompanyBlobs()
     {
+        Log.d("LoadBlobs","begin of method");
+        ObjectMapper jsonMapper = new ObjectMapper();
+        WebserviceReturnObject result;
+        for (final Company company : availableCompanies) {
+            try {
+                String url = Constants.GetBlobForIDURL.replace("{blobid}",company.getBlobId());
+                new HttpGetByteRequest(){
+                    @Override
+                    protected void onPostExecute(WebserviceReturnObject result) {
+                        if(result.getStatusCode() != Constants.HTTP_RESULT_OK) {
+                            String tmp = result.getReturnString();
 
+                        }
 
+                        company.setImageBytes(result.getBytes());
+                        //BufferedImage img = ImageIO.read(new ByteArrayInputStream(bytes));
+                    }
+                }.execute(url);
+            }
+            catch(Exception e){
+                e.printStackTrace();
+
+            }
+        }
+    }
+    private void LoadStoresForCompanyies() {
+        Log.d("LoadStores","begin of method");
+        ObjectMapper jsonMapper = new ObjectMapper();
+        WebserviceReturnObject result;
+        try {
+            for (final Company company : availableCompanies) {
+                String storeCountUrl = Constants.GetStoresForCompanyCountURL.replace("{companyid}",company.getId());
+                new HttpGetJsonRequest() {
+                    @Override
+                    protected void onPostExecute(WebserviceReturnObject result) {
+                        if (result.getStatusCode() != Constants.HTTP_RESULT_OK) {
+                            String tmp = result.getReturnString();
+                        }
+                        Log.d("LoadStores", "Count Status Code: " + result.getStatusCode());
+                        ObjectMapper jsonMapper = new ObjectMapper();
+                        try {
+                            if (result.getReturnString() != null && result.getReturnString().length() > 0) {
+                                CountDTO anz = jsonMapper.readValue(result.getReturnString(), CountDTO.class);
+                                Log.d("CardManager", "CompanyStoreCountRequest: " + anz.getCount());
+                                String storeUrl = Constants.GetStoresForCompanyURL.replace("{companyid}",company.getId());
+                                new HttpGetJsonRequest() {
+                                    @Override
+                                    protected void onPostExecute(WebserviceReturnObject result) {
+                                        if (result.getStatusCode() != Constants.HTTP_RESULT_OK) {
+                                            String tmp = result.getReturnString();
+                                        }
+                                        ObjectMapper jsonMapper = new ObjectMapper();
+                                        try {
+                                            String res = result.getReturnString();
+                                            List<StoreDTO> stores = mapper.readValue(result.getReturnString(),
+                                                    TypeFactory.defaultInstance().constructCollectionType(List.class,
+                                                            StoreDTO.class));
+                                           company.getStores().addAll(getStoreList(stores));
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                            Log.e("CardManager", "Abruf der Stores fehlgeschlagen", e);
+                                        }
+                                    }
+                                }.execute(storeUrl);
+                            }
+                        } catch (IOException exception) {
+                            String s = exception.getStackTrace().toString();
+                            Log.e("CardManager", s, exception);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Log.e("CardManager", e.getMessage() + " " + e.getStackTrace().toString());
+                        }
+                    }
+                }.execute(storeCountUrl);
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
     }
 }

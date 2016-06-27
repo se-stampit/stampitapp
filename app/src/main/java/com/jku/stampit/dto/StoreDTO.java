@@ -6,16 +6,12 @@ import java.util.Date;
  * Created by Andreas on 09.05.16.
  */
 public class StoreDTO {
-    private String id,companyId,address, name;
+
+   // [{"id":"70259cfe7d3e43c195aa411ec89b7cb7","createdAt":"2016-06-16T00:55:01.1749925","updatedAt":null,"companyId":"ID123","address":"Coffeestreet","latitude":48.2,"longitude":12.4},{"id":"f9d5a436bef1422b9fa024f92ca5159b","createdAt":"2016-06-16T06:50:50.4039811","updatedAt":null,"companyId":"ID123","address":"Adersfsfd","latitude":48.2109472779491,"longitude":12.4177265167236}]
+
+    private String id,companyId,address;
     private Date createdAt,updatedAt;
     private Double latitude,longitude;
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getId() {
         return id;
