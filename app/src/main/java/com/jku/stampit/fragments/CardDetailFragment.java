@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.zxing.integration.android.IntentIntegrator;
 import com.jku.stampit.R;
 import com.jku.stampit.Services.CardManager;
 import com.jku.stampit.controls.StampView;

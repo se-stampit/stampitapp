@@ -96,6 +96,8 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
         //Create Floating Action Button for Camera
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(this);
+        fab.show();
+
         /*
         CardManager.getInstance().LoadMyStampCardsFromServer(new CardManager.CardManagerCardUpdateCallback() {
             @Override

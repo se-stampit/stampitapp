@@ -22,7 +22,7 @@ import java.util.UUID;
  */
 public class StampCard implements Parcelable {
     private String id;
-    private Date createdAt,updatedAt;
+    private Date createdAt = new Date(0),updatedAt = new Date(0);
     private String userId;
 
     public String getCompanyId() {
@@ -99,14 +99,24 @@ public class StampCard implements Parcelable {
     }
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+
+        long uTime = 0;
+        long cTime = 0;
+        if(updatedAt != null) {
+            uTime = updatedAt.getTime();
+        }
+        if(createdAt != null) {
+            cTime = createdAt.getTime();
+        }
+
         dest.writeStringArray(new String[] {this.id,
                 this.productName,
                 this.companyId,
         this.bonusDescription,
         String.valueOf(this.requiredStampCount),
                 String.valueOf(this.currentStampCount),
-                String.valueOf(createdAt.getTime()),
-                String.valueOf(updatedAt.getTime()),
+                String.valueOf(cTime),
+                String.valueOf(uTime),
                 String.valueOf(this.maxDuration),
                 String.valueOf(this.isUsed)});
     }

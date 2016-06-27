@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -31,10 +32,13 @@ import com.google.android.gms.plus.model.people.Person;
 import com.jku.stampit.R;
 import com.jku.stampit.Services.CardManager;
 import com.jku.stampit.Services.UserManager;
+import com.jku.stampit.StampItApplication;
+import com.jku.stampit.data.StampCard;
 import com.jku.stampit.dto.UserInfo;
 import com.jku.stampit.utils.Utils;
 
 import java.io.IOException;
+import java.util.List;
 
 //ConnectionCallbacks,
 public class LoginActivity extends FragmentActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
@@ -55,21 +59,22 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //Init Cardmanager to get cards and other stuff
-        CardManager.getInstance().LoadMyStampCardsFromServer(null);
+
+        CardManager.getInstance().LoadMyStampCardsFromServer(new CardManager.CardManagerCardUpdateCallback() {
+            @Override
+            public void CardsUpdated(List<StampCard> newCards) {
+                List<StampCard> l = newCards;
+            }
+        });
         //this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_login);
 
         timesOnHomeScreen = 0;
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        // dummy username for testing purposes
-        Intent i = new Intent(getApplicationContext(), MainActivity.class);
-        //i.putExtra("username", "Benjamin Harvey");
-        //username = "Benjamin Harvey";
-        //startActivity(i);
-
         mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);
         mSignInButton.setOnClickListener(this);
+        mSignInButton.setVisibility(View.INVISIBLE); //hide Login Button
         if (savedInstanceState != null) {
             mSignInProgress = savedInstanceState.getInt(
                     SAVED_PROGRESS, STATE_DEFAULT);
@@ -77,8 +82,21 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
 
         mGoogleApiClient = buildGoogleApiClient();
 
-        //TODO Check if user already signed in
+        //check if token exists
+        if(UserManager.getInstance().getSessionToken() != "") {
+            //check if user is logged in
 
+        } else {
+            //show google plus login button
+            mSignInButton.setVisibility(View.VISIBLE);
+            //TODO Check if user already signed in
+            if(mGoogleApiClient.isConnected()){
+                mGoogleApiClient.connect();
+                // dummy username for testing purposes
+                //Intent i = new Intent(getApplicationContext(), MainActivity.class);
+                //startActivity(i);
+            }
+        }
     }
 
     private GoogleApiClient buildGoogleApiClient() {
@@ -86,7 +104,6 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
-
 
         // Build a GoogleApiClient with access to the Google Sign-In API and the
         // options specified by gso.
@@ -161,7 +178,6 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
 
             String token = "";// = acct.getIdToken();
             //String[] splitted = acct.getDisplayName().split(" ");
-
 
             UserInfo userinfo = new UserInfo("","","");// = new UserInfo(splitted[0], splitted[1], acct.getEmail());
             if (debug) {

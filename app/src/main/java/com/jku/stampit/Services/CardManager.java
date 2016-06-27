@@ -79,7 +79,7 @@ public class CardManager {
     private CardManager() {
         mapper = new ObjectMapper();
         broadcaster = LocalBroadcastManager.getInstance(StampItApplication.getContext());
-        mycards.addAll(getDummyCards());
+        //mycards.addAll(getDummyCards());
         availableCompanies.addAll(getDummyCompanies());
 
         Log.d("Cardmanager", "constructor call");
@@ -274,7 +274,6 @@ public class CardManager {
         ObjectMapper jsonMapper = new ObjectMapper();
         WebserviceReturnObject result;
         try {
-
             new HttpGetJsonRequest(){
                 @Override
                 protected void onPostExecute(WebserviceReturnObject result) {

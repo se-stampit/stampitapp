@@ -1,0 +1,10 @@
+<android.support.design.widget.FloatingActionButton
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fab"
+    android:layout_width="80dp"
+    android:layout_height="80dp"
+    android:scaleType="fitCenter"
+    android:layout_gravity="end|bottom"
+    android:layout_margin="@dimen/fab_margin"
+    android:background="@color/lightblue100"
+    android:src="@drawable/scan" />
