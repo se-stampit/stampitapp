@@ -170,6 +170,7 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
 
     private void handleSignInResult(GoogleSignInResult result) {
         Log.d("Login", "handleSignInResult:" + result.isSuccess() + " Status: " + result.getStatus());
+        Toast.makeText(this.getApplicationContext(),"handleSignInResult:" + result.isSuccess() + " Status: " + result.getStatus(),Toast.LENGTH_LONG).show();
         boolean debug = true;
         if (result.isSuccess() || debug) {
             // Signed in successfully, show authenticated UI.

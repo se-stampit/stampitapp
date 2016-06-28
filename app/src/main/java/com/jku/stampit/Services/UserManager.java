@@ -23,7 +23,7 @@ public class UserManager {
     private static UserManager instance;
     private User user;
 
-    private String sessionToken;
+    private String sessionToken = "";
 
     public static UserManager getInstance() {
         if(instance == null)
