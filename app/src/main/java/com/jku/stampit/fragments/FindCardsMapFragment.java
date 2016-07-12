@@ -317,10 +317,10 @@ public class FindCardsMapFragment extends Fragment implements
 
 
     public void onInfoWindowClick(Marker m) {
-        Intent i = new Intent(getContext(), CompanyCardsActivity.class);
-         CompStore compStore = getCompStoreforMarker(m);
-        i.putExtra(CompanyCardsActivity.compIDParameter, compStore.getCompanyID());
-        startActivity(i);
+        //Intent i = new Intent(getContext(), CompanyCardsActivity.class);
+        // CompStore compStore = getCompStoreforMarker(m);
+        //i.putExtra(CompanyCardsActivity.compIDParameter, compStore.getCompanyID());
+        //startActivity(i);
     }
 
     private CompStore getCompStoreforMarker(Marker marker) {

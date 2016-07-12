@@ -3,6 +3,7 @@ package com.jku.stampit.activities;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -10,6 +11,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
@@ -23,6 +25,7 @@ import android.widget.Toast;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.jku.stampit.R;
 import com.jku.stampit.Services.CardManager;
+import com.jku.stampit.StampItApplication;
 import com.jku.stampit.controls.StampView;
 import com.jku.stampit.data.StampCard;
 import com.jku.stampit.fragments.CardDetailFragment;
@@ -93,8 +96,19 @@ public class StampcardDetailActivity extends AppCompatActivity implements  View.
 
                 public void onClick(DialogInterface dialog, int which) {
                     // Do nothing but close the dialog
-                    CardManager.getInstance().DeleteCard(card.getId());
-                    finish();
+                    final ProgressDialog dlg = ProgressDialog.show(StampcardDetailActivity.this, "", "lösche Karten...", true);
+                    dlg.show();
+                    CardManager.getInstance().DeleteCard(card.getId(), new CardManager.CardManagerCardDeleteCallback() {
+                        @Override
+                        public void Deleted(Boolean deleted) {
+                            dlg.dismiss();
+                            if(deleted){
+                                NavUtils.navigateUpFromSameTask(StampcardDetailActivity.this);
+                            } else {
+                                Toast.makeText(StampItApplication.getContext(),"Karte konnte nicht gelöscht werden",Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    });
                 }
             });
 

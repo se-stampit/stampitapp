@@ -19,4 +19,5 @@
     <string name="my_cards">Meine Karten</string>
     <string name="deleteCardTitle">Karte löschen</string>
     <string name="deleteCardQuestion">Willst du die Karte wirklich löschen?</string>
+    <string name="update_cardlist_adapter">update_cardlist_adapter</string>
 </resources>

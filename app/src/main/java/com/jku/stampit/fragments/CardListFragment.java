@@ -11,6 +11,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import com.jku.stampit.R;
@@ -31,7 +32,14 @@ public class CardListFragment extends ListFragment {
 
     CardListAdapter cardListAdapter = null;
     private BroadcastReceiver receiver;
-    private ArrayList<StampCard> cards;
+
+    public void setCards(List<StampCard> cards) {
+        this.cards.clear();
+        this.cards.addAll(cards);
+        cardListAdapter.SetCards(cards);
+    }
+
+    private List<StampCard> cards;
     private static final String ARG_CardListID = "cardlistID";
 
     public static CardListFragment newInstance(ArrayList<StampCard> cards) {
@@ -40,6 +48,11 @@ public class CardListFragment extends ListFragment {
         args.putParcelableArrayList(ARG_CardListID, cards);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public CardListAdapter getListAdapter() {
+        return cardListAdapter;
     }
 
     @Override
@@ -79,11 +92,6 @@ public class CardListFragment extends ListFragment {
     @Override
     public void onStart() {
         super.onStart();
-        /*
-        LocalBroadcastManager.getInstance(this.getContext()).registerReceiver((receiver),
-                new IntentFilter(CardManager.CARDS_UPDATE_MESSAGE)
-        );
-        */
     }
 
     @Override
@@ -102,5 +110,10 @@ public class CardListFragment extends ListFragment {
         StampCard card = cardListAdapter.getItem(position);
         i.putExtra(StampcardDetailActivity.cardIDParameter, card.getId());
         startActivity(i);
+    }
+    public void Filter(String text) {
+        if(cardListAdapter != null) {
+            cardListAdapter.getFilter().filter(text);
+        }
     }
 }

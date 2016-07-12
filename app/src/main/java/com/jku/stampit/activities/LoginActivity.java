@@ -1,47 +1,46 @@
 package com.jku.stampit.activities;
 
-import android.app.Activity;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
-import android.view.Window;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
-import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
-
 import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.plus.People;
 import com.google.android.gms.plus.Plus;
-import com.google.android.gms.plus.model.people.Person;
-
 import com.jku.stampit.R;
 import com.jku.stampit.Services.CardManager;
 import com.jku.stampit.Services.UserManager;
+import com.jku.stampit.Services.WebserviceReturnObject;
 import com.jku.stampit.StampItApplication;
 import com.jku.stampit.data.StampCard;
+import com.jku.stampit.dto.LoginDTO;
+import com.jku.stampit.dto.RegisterDTO;
+import com.jku.stampit.dto.SessionTokenDTO;
 import com.jku.stampit.dto.UserInfo;
-import com.jku.stampit.utils.Utils;
 
-import java.io.IOException;
 import java.util.List;
 
-//ConnectionCallbacks,
-public class LoginActivity extends FragmentActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
+//
+public class LoginActivity extends FragmentActivity
+        implements OnConnectionFailedListener,GoogleApiClient.ConnectionCallbacks, View.OnClickListener {
+    private static final String TAG = "com-jku-stampit";
 
     private static final int RC_SIGN_IN = 9001;
     private static final int STATE_DEFAULT = 0;
@@ -52,56 +51,35 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
     private int mSignInProgress;
     private PendingIntent mSignInIntent;
     private SignInButton mSignInButton;
-    public static String username;
-    public static int timesOnHomeScreen;
+    private ProgressDialog dialog;
 
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //Init Cardmanager to get cards and other stuff
+        CardManager.getInstance().Init();
 
-        CardManager.getInstance().LoadMyStampCardsFromServer(new CardManager.CardManagerCardUpdateCallback() {
-            @Override
-            public void CardsUpdated(List<StampCard> newCards) {
-                List<StampCard> l = newCards;
-            }
-        });
-        //this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_login);
-
-        timesOnHomeScreen = 0;
-        //requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog = new ProgressDialog(LoginActivity.this);
 
         mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);
         mSignInButton.setOnClickListener(this);
-        mSignInButton.setVisibility(View.INVISIBLE); //hide Login Button
+        mSignInButton.setEnabled(true);
+
+        if (savedInstanceState != null) {
+            mSignInProgress = savedInstanceState.getInt(SAVED_PROGRESS, STATE_DEFAULT);
+        }
+
         if (savedInstanceState != null) {
             mSignInProgress = savedInstanceState.getInt(
                     SAVED_PROGRESS, STATE_DEFAULT);
         }
 
         mGoogleApiClient = buildGoogleApiClient();
-
-        //check if token exists
-        if(UserManager.getInstance().getSessionToken() != "") {
-            //check if user is logged in
-
-        } else {
-            //show google plus login button
-            mSignInButton.setVisibility(View.VISIBLE);
-            //TODO Check if user already signed in
-            if(mGoogleApiClient.isConnected()){
-                mGoogleApiClient.connect();
-                // dummy username for testing purposes
-                //Intent i = new Intent(getApplicationContext(), MainActivity.class);
-                //startActivity(i);
-            }
-        }
     }
 
     private GoogleApiClient buildGoogleApiClient() {
-
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken("229653082955-3mut736305gggd1f8b0nsitlhtsab8sg.apps.googleusercontent.com")
                 .requestEmail()
                 .build();
 
@@ -109,52 +87,26 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
         // options specified by gso.
         return new GoogleApiClient.Builder(this)
                 .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                .addOnConnectionFailedListener(this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
     }
 
-    /*
     @Override
     protected void onStart()
     {
         super.onStart();
-        mGoogleApiClient.connect();
     }
 
-    @Override
-    protected void onStop()
-    {
-        super.onStop();
-
-        if (mGoogleApiClient.isConnected())
-        {
-            mGoogleApiClient.disconnect();
-        }
-    }
-*/
-    /*
-    @Override
-    protected void onSaveInstanceState(Bundle outState)
-    {
-        super.onSaveInstanceState(outState);
-        outState.putInt(SAVED_PROGRESS, mSignInProgress);
-    }
-*/
     @Override
     public void onClick(View v) {
-        if (!mGoogleApiClient.isConnecting()) {
             switch (v.getId()) {
                 case R.id.sign_in_button:
                     Log.d("Login", "Button clicked");
-                    //resolveSignInError();
-
-                    //Intent i = new Intent(getApplicationContext(), MainActivity.class);
-                    //startActivity(i);
 
                     signIn();
                     break;
             }
-        }
     }
 
     @Override
@@ -170,40 +122,45 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
 
     private void handleSignInResult(GoogleSignInResult result) {
         Log.d("Login", "handleSignInResult:" + result.isSuccess() + " Status: " + result.getStatus());
-        Toast.makeText(this.getApplicationContext(),"handleSignInResult:" + result.isSuccess() + " Status: " + result.getStatus(),Toast.LENGTH_LONG).show();
-        boolean debug = true;
+        //Toast.makeText(this.getApplicationContext(),"handleSignInResult:" + result.isSuccess() + " Status: " + result.getStatus(),Toast.LENGTH_LONG).show();
+        boolean debug = false;
+        dialog = ProgressDialog.show(this, "", "registrieren und einloggen...", true);
         if (result.isSuccess() || debug) {
             // Signed in successfully, show authenticated UI.
             Log.i("LOGIN", "Google signed in succeccfully ");
-            //GoogleSignInAccount acct = result.getSignInAccount();
+            GoogleSignInAccount acct = result.getSignInAccount();
+            String token = acct.getIdToken();
+            String[] splitted = acct.getDisplayName().split(" ");
 
-            String token = "";// = acct.getIdToken();
-            //String[] splitted = acct.getDisplayName().split(" ");
+            UserInfo userinfo;
+            userinfo = new UserInfo(splitted[0], splitted[1], acct.getEmail());
 
-            UserInfo userinfo = new UserInfo("","","");// = new UserInfo(splitted[0], splitted[1], acct.getEmail());
-            if (debug) {
-                token = "testToken";
-                userinfo = new UserInfo("Andreas","Lengauer","andreaslengauer94@gmail.com");
-            }
-            UserManager.getInstance().login("google", token, userinfo, new UserManager.UserManagerLoginCallback() {
+            RegisterDTO registerDTO = new RegisterDTO();
+            registerDTO.setAuthprovider("google");
+            registerDTO.setToken(token);
+            registerDTO.setUser(userinfo);
+            final LoginDTO loginDTO = new LoginDTO("google",token);
+
+            UserManager.getInstance().register(registerDTO, new UserManager.LoginCompletionHandler() {
                 @Override
-                public void LoginSuccessfull() {
-                    updateUI(true);
-                }
-
-                @Override
-                public void LoginFailed() {
-                    updateUI(false);
+                public void complete(SessionTokenDTO token, WebserviceReturnObject result) {
+                    //User already registered, Login instead
+                    //Toast.makeText(StampItApplication.getContext(),"token:" + UserManager.getInstance().getSessionToken(),Toast.LENGTH_LONG).show();
+                    if(result.getStatusCode() == 400){
+                        //Already registered, sign in
+                        updateUI(false);
+                    } else if(result.getStatusCode() == 200) {
+                        //registered
+                        updateUI(true);
+                    } else {
+                        //
+                        updateUI(false);
+                    }
                 }
             });
-            //mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
-            //   mStatusTextView.setText(getString(R.string.auth_google_play_services_client_google_display_name,acct.getDisplayName()));
-
-            //updateUI(true);
         } else {
             // Signed out, show unauthenticated UI.
             updateUI(false);
-
         }
     }
 
@@ -213,38 +170,18 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
     }
 
     private void updateUI(boolean signedIn) {
+        if(dialog != null) {
+            dialog.dismiss();
+        }
         if (signedIn) {
             //Show Main Screen
             finishLogin();
         } else {
-            //   mStatusTextView.setText(R.string.signed_out);
             findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
-            // findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
             Toast.makeText(getApplicationContext(), "Login fehlgeschlagen", Toast.LENGTH_SHORT).show();
         }
     }
 
-    /*
-    @Override
-    public void onConnected(Bundle connectionHint)
-    {
-        mSignInButton.setEnabled(false);
-
-        Auth.GoogleSignInApi.
-        //Person currentUser = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
-        //username = currentUser.getDisplayName();
-
-        //Toast toast = Toast.makeText(getApplicationContext(),
-        //        "Welcome " + username + "ID:" + currentUser.getId(), Toast.LENGTH_LONG);
-        //toast.show();
-
-
-        //mSignInProgress = STATE_DEFAULT;
-        Intent i = new Intent(getApplicationContext(), MainActivity.class);
-        startActivity(i);
-        finish();
-    }@
-    */
     private void signIn() {
         Log.d("Login", "signIN Method was called");
         findViewById(R.id.sign_in_button).setVisibility(View.GONE);
@@ -252,32 +189,50 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
-    private void signOut() {
-        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                new ResultCallback<Status>() {
-                    @Override
-                    public void onResult(Status status) {
-                        // [START_EXCLUDE]
-                        updateUI(false);
-                        // [END_EXCLUDE]
-                    }
-                });
-    }
-
     @Override
     public void onConnectionFailed(ConnectionResult result) {
-        /*
-        if (mSignInProgress != STATE_IN_PROGRESS)
-        {
+        if (mSignInProgress != STATE_IN_PROGRESS) {
             mSignInIntent = result.getResolution();
-            if (mSignInProgress == STATE_SIGN_IN)
-            {
+            if (mSignInProgress == STATE_SIGN_IN) {
                 resolveSignInError();
             }
         }
-        */
     }
+    /*
+            * onConnected is called when our Activity successfully connects to Google
+            * Play services. onConnected indicates that an account was selected on the
+            * device, that the selected account has granted any requested permissions
+            * to our app and that we were able to establish a service connection to
+            * Google Play services.
+            */
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        // Reaching onConnected means we consider the user signed in.
+        Log.i(TAG, "onConnected");
 
+        // Update the user interface to reflect that the user is signed in.
+        //mSignInButton.setEnabled(false);
+        //mSignOutButton.setEnabled(true);
+        //mRevokeButton.setEnabled(true);
+
+        // Retrieve some profile information to personalize our app for the
+        // user.
+        //Person currentUser = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
+
+        // Indicate that the sign in process is complete.
+        mSignInProgress = STATE_DEFAULT;
+
+        //Toast.makeText(this, mStatus.getText(), Toast.LENGTH_LONG).show();
+        //TODO Call Stampit Login Method
+
+    }
+    @Override
+    public void onConnectionSuspended(int cause) {
+        // The connection to Google Play services was lost for some reason.
+        // We call connect() to attempt to re-establish the connection or get a
+        // ConnectionResult that we can attempt to resolve.
+        mGoogleApiClient.connect();
+    }
     private void resolveSignInError() {
         if (mSignInIntent != null) {
             try {
@@ -293,17 +248,46 @@ public class LoginActivity extends FragmentActivity implements GoogleApiClient.O
                 mGoogleApiClient.connect();
             }
         } else {
+            /*
             Toast.makeText(getApplicationContext(),
                     "Error signing in", Toast.LENGTH_SHORT)
                     .show();
+            */
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        //TODO do we need back?
-        //Intent intent = new Intent(getApplicationContext(), SplashScreen.class);
-        //startActivity(intent);
+    public void disconnect() {
+        if (mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
     }
 
+    public void logOut() {
+        if (mGoogleApiClient.isConnected()) {
+            signOut();
+            revokeAccess();
+            mGoogleApiClient.disconnect();
+        }
+    }
+
+    private void signOut() {
+        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(Status status) {
+                        String s = status.toString();
+                        //App.logger().d(TAG, "signOut: status = " + status);
+                    }
+                });
+    }
+
+    private void revokeAccess() {
+        Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient).setResultCallback(
+                new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(Status status) {
+                        //App.logger().d(TAG, "revokeAccess: status = " + status);
+                    }
+                });
+    }
 }

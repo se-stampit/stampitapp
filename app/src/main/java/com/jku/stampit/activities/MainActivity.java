@@ -1,6 +1,7 @@
 package com.jku.stampit.activities;
 
 import android.annotation.TargetApi;
+import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -36,6 +37,7 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.jku.stampit.R;
 import com.jku.stampit.Services.CardManager;
+import com.jku.stampit.StampItApplication;
 import com.jku.stampit.data.StampCard;
 import com.jku.stampit.fragments.CardListFragment;
 import com.jku.stampit.fragments.FindCardsMapFragment;
@@ -62,6 +64,9 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
     private ViewPager mViewPager;
     private List<Fragment> tabs = new ArrayList<Fragment>();
     private CardListFragment cardListFrag;
+    private ProgressDialog dialog;
+    private Boolean firstStart = true;
+    ArrayList<StampCard> cards = new ArrayList<StampCard>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,9 +76,10 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
 
         //Create Taps which should be shown
         //create CardListFragment with my Cards available
-        ArrayList<StampCard> cards = new ArrayList<StampCard>();
+
         cards.addAll(CardManager.getInstance().GetMyCards());
-        cardListFrag =  CardListFragment.newInstance(cards);
+        cardListFrag = CardListFragment.newInstance(cards);
+        dialog = new ProgressDialog(MainActivity.this);
 
         //Create FindCardMapsFragment
         FindCardsMapFragment companyMap = FindCardsMapFragment.newInstance();
@@ -97,15 +103,26 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(this);
         fab.show();
+    }
+    @Override
+    protected void onStart() {
+        super.onStart();
 
-        /*
-        CardManager.getInstance().LoadMyStampCardsFromServer(new CardManager.CardManagerCardUpdateCallback() {
-            @Override
-            public void CardsUpdated(List<StampCard> newCards) {
-                recreate();
-            }
-        });
-        */
+        if(CardManager.getInstance().firstStart) {
+            CardManager.getInstance().firstStart = false;
+            dialog = ProgressDialog.show(MainActivity.this, "", "lade Karten...", true);
+            dialog.show();
+            CardManager.getInstance().LoadMyStampCardsFromServer(new CardManager.CardManagerCardUpdateCallback() {
+                @Override
+                public void CardsUpdated(List<StampCard> newCards) {
+                    cardListFrag.setCards(newCards);
+                    //Reload List
+                    //cardListFrag.getListAdapter().
+                    dialog.dismiss();
+                }
+            });
+        }
+
     }
     public void onClick(View view) {
         // Intent i = new Intent(getApplicationContext(),ScanActivity.class);
@@ -126,7 +143,6 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
                 if (resultCode != RESULT_CANCELED) {
                     IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
                     final String QrCode = scanResult.getContents();
-                    //Toast.makeText(getApplication(),QrCode,Toast.LENGTH_LONG).show();
                     CardManager.getInstance().ScanStamp(QrCode, new CardManager.CardManagerScanListener() {
                         @Override
                         public void ScanSuccessfull(Integer statusCode) {
@@ -137,11 +153,15 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
                                         Toast.makeText(getApplication(),"Code erfolgreich eingelöst",Toast.LENGTH_LONG).show();
                                     }
                                 });
+                                //final ProgressDialog dlg = ProgressDialog.show(MainActivity.this, "", "lade Karten...", true);
+                                //dlg.show();
                                 //TODO Load new Cards from Server
                                 CardManager.getInstance().LoadMyStampCardsFromServer(new CardManager.CardManagerCardUpdateCallback() {
                                     @Override
                                     public void CardsUpdated(List<StampCard> newCards) {
-                                        recreate();
+                                        cardListFrag.setCards(newCards);
+                                        //reload List
+                                        //cardListFrag.Filter("");
                                     }
                                 });
                             }
@@ -289,12 +309,15 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
 
     }
     public boolean onQueryTextChange(String newText) {
-
+    /*
         if (TextUtils.isEmpty(newText)) {
             cardListFrag.getListView().clearTextFilter();
         } else {
             cardListFrag.getListView().setFilterText(newText);
         }
+        return true;
+        */
+        cardListFrag.Filter(newText);
         return true;
     }
 

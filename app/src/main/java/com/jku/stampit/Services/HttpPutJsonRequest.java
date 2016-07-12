@@ -54,16 +54,19 @@ public class HttpPutJsonRequest extends AsyncTask<String,Void,WebserviceReturnOb
             connection.setReadTimeout(15 * 1000);
             connection.connect();
 
-            // read the output from the server
-            reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            stringBuilder = new StringBuilder();
-
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line + "\n");
-            }
-            result.setReturnString(stringBuilder.toString());
             result.setStatusCode(connection.getResponseCode());
+            BufferedReader br;
+            if (200 <= connection.getResponseCode() && connection.getResponseCode() <= 299) {
+                br = new BufferedReader(new InputStreamReader((connection.getInputStream())));
+            } else {
+                br = new BufferedReader(new InputStreamReader((connection.getErrorStream())));
+            }
+            StringBuilder sb = new StringBuilder();
+            String output;
+            while ((output = br.readLine()) != null) {
+                sb.append(output);
+                result.setReturnString(sb.toString());
+            }
         } catch (Exception e) {
             e.printStackTrace();
             // throw e;

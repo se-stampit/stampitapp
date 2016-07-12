@@ -24,6 +24,7 @@ public class CardListAdapter extends ArrayAdapter<StampCard>  implements Filtera
     private final Context context;
     private final List<StampCard> orig;
     private final List<StampCard> values;
+    private CardFilter cardFilter;
     public CardListAdapter(Context context, List<StampCard> cards) {
         super(context, 0, cards);
         this.context = context;
@@ -35,6 +36,8 @@ public class CardListAdapter extends ArrayAdapter<StampCard>  implements Filtera
     public void SetCards(List<StampCard> newCards){
         orig.clear();
         orig.addAll(newCards);
+        values.clear();
+        values.addAll(newCards);
         notifyDataSetChanged();
     }
 
@@ -53,7 +56,13 @@ public class CardListAdapter extends ArrayAdapter<StampCard>  implements Filtera
         return position;
     }
 
+    @Override
     public Filter getFilter() {
+        if(cardFilter == null) {
+            cardFilter = new CardFilter();
+        }
+        return cardFilter;
+        /*
         return new Filter() {
 
             @Override
@@ -86,6 +95,7 @@ public class CardListAdapter extends ArrayAdapter<StampCard>  implements Filtera
                 notifyDataSetChanged();
             }
         };
+        */
     }
 
     @Override
@@ -120,5 +130,31 @@ public class CardListAdapter extends ArrayAdapter<StampCard>  implements Filtera
         }
         // Return the completed view to render on screen
         return convertView;
+    }
+    private class CardFilter extends Filter {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            FilterResults results = new FilterResults();
+            if(constraint == null || constraint.length() == 0) {
+                results.values = orig;
+                results.count = orig.size();
+            } else {
+                List<StampCard> filteredCards = new ArrayList<StampCard>();
+                for(StampCard s : orig){
+                    if(s.getProductName().toUpperCase().contains(constraint.toString().toUpperCase()))
+                        filteredCards.add(s);
+                }
+                results.values = filteredCards;
+                results.count = filteredCards.size();
+            }
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            values.clear();
+            values.addAll((List<StampCard>) results.values);
+            notifyDataSetChanged();
+        }
     }
 }

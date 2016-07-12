@@ -48,6 +48,7 @@ public class CardManager {
     private final List<Company> availableCompanies = new ArrayList<Company>();
     private  LocalBroadcastManager broadcaster;
     private SharedPreferences settings;
+    public boolean firstStart = true;
     //List for unverified Tokens, which must be sent to server
     //We dont know Syntax in Application for Security Reasons
     private ObjectMapper mapper;
@@ -67,7 +68,10 @@ public class CardManager {
     {
         public void StampsUpdated();
     }
-
+    public interface CardManagerCardDeleteCallback
+    {
+        public void Deleted(Boolean deleted);
+    }
     public static CardManager getInstance()
     {
         if (instance == null)
@@ -80,14 +84,10 @@ public class CardManager {
     private CardManager() {
         mapper = new ObjectMapper();
         broadcaster = LocalBroadcastManager.getInstance(StampItApplication.getContext());
-        //mycards.addAll(getDummyCards());
-        //availableCompanies.addAll(getDummyCompanies());
 
         Log.d("Cardmanager", "constructor call");
-        //LoadMyStampCardsFromServer();
-        LoadProvidersFromServer();
         settings = StampItApplication.getContext().getSharedPreferences(StampItApplication.APP_PREFERENCES, 0);
-        unverifiedStampTokens.addAll(settings.getStringSet(UNVERIFIED_STAMPES_KEY, new HashSet<String>()));
+        //unverifiedStampTokens.addAll(settings.getStringSet(UNVERIFIED_STAMPES_KEY, new HashSet<String>()));
     }
 
     public void SaveSettings() {
@@ -141,10 +141,31 @@ public class CardManager {
         return stampCards;
     }
 
-    public void DeleteCard(String cardID) {
-        StampCard card = GetMyCardForID(cardID);
+    public void DeleteCard(String cardID,final CardManagerCardDeleteCallback callback) {
+        final StampCard card = GetMyCardForID(cardID);
         if(card != null) {
-            card.setDeleteDate(new Date());
+            String url = Constants.DeleteStampCardURL.replace("{cardid}",card.getId());
+            Map<String,String> header = new HashMap<String,String>();
+            header.put("auth", UserManager.getInstance().getSessionToken());
+            new HttpDeleteRequest(header){
+                @Override
+                protected void onPostExecute(WebserviceReturnObject result) {
+                    if(result.getStatusCode() == Constants.HTTP_RESULT_DELETE_OK) {
+                        card.setDeleteDate(new Date());
+                        if(callback != null) {
+                            callback.Deleted(true);
+                        }
+                    }else {
+                        if(callback != null) {
+                            callback.Deleted(false);
+                        }
+                    }
+                }
+            }.execute(url);
+        } else {
+            if(callback != null) {
+                callback.Deleted(false);
+            }
         }
     }
    public List<StampCard> getCardsForCompanyID(String compID){
@@ -228,8 +249,10 @@ public class CardManager {
         ObjectMapper jsonMapper = new ObjectMapper();
         WebserviceReturnObject result;
         //String json = "[{\"id\":\"ef946eebfbb24f84bff2086b3686f93f\",\"createdAt\":\"2016-05-11T09:28:58.842291+00:00\",\"updatedAt\":null,\"userId\":\"e805e74cbd164ce48a0a47ec4f8349eb\",\"companyId\":\"41337af111404588b33e6bbfe8933a49\",\"productName\":\"Coffee\",\"requiredStampCount\":10,\"bonusDescription\":\"Get one free coffee\",\"maxDuration\":365,\"isUsed\":false,\"currentStampCount\":0}]";
-
-        new HttpGetJsonRequest(){
+        HashMap<String,String> params = new HashMap<String,String>();
+        //Put sessiontoken to auth to receive my cards
+        params.put("auth",UserManager.getInstance().getSessionToken());
+        new HttpGetJsonRequest(params){
             @Override
             protected void onPostExecute(WebserviceReturnObject result) {
                 if(result.getStatusCode() != Constants.HTTP_RESULT_OK) {
@@ -286,7 +309,7 @@ public class CardManager {
         ObjectMapper jsonMapper = new ObjectMapper();
         WebserviceReturnObject result;
         try {
-            new HttpGetJsonRequest(){
+            new HttpGetJsonRequest(null){
                 @Override
                 protected void onPostExecute(WebserviceReturnObject result) {
                     if(result.getStatusCode() != Constants.HTTP_RESULT_OK) {
@@ -298,7 +321,7 @@ public class CardManager {
                         if(result.getReturnString() != null && result.getReturnString().length() > 0) {
                             CountDTO anz = jsonMapper.readValue(result.getReturnString(), CountDTO.class);
                             Log.d("CardManager", "ProviderCountRequest: " + anz.getCount());
-                            new HttpGetJsonRequest() {
+                            new HttpGetJsonRequest(null) {
                                 @Override
                                 protected void onPostExecute(WebserviceReturnObject result) {
                                     if (result.getStatusCode() != Constants.HTTP_RESULT_OK) {
@@ -340,7 +363,7 @@ public class CardManager {
     }
     public void ResendUnverifiedTokes(final CardManagerStampUpdateCallback callback){
         //TODO Upload Stamps to Server
-        callback.StampsUpdated();
+        //callback.StampsUpdated();
     }
     private void LoadCompanyBlobs()
     {
@@ -376,7 +399,7 @@ public class CardManager {
         try {
             for (final Company company : availableCompanies) {
                 String storeCountUrl = Constants.GetStoresForCompanyCountURL.replace("{companyid}",company.getId());
-                new HttpGetJsonRequest() {
+                new HttpGetJsonRequest(null) {
                     @Override
                     protected void onPostExecute(WebserviceReturnObject result) {
                         if (result.getStatusCode() != Constants.HTTP_RESULT_OK) {
@@ -389,7 +412,7 @@ public class CardManager {
                                 CountDTO anz = jsonMapper.readValue(result.getReturnString(), CountDTO.class);
                                 Log.d("CardManager", "CompanyStoreCountRequest: " + anz.getCount());
                                 String storeUrl = Constants.GetStoresForCompanyURL.replace("{companyid}",company.getId());
-                                new HttpGetJsonRequest() {
+                                new HttpGetJsonRequest(null) {
                                     @Override
                                     protected void onPostExecute(WebserviceReturnObject result) {
                                         if (result.getStatusCode() != Constants.HTTP_RESULT_OK) {
@@ -423,5 +446,14 @@ public class CardManager {
         catch(Exception e){
             e.printStackTrace();
         }
+    }
+    public void Init() {
+        LoadProvidersFromServer();
+        CardManager.getInstance().LoadMyStampCardsFromServer(new CardManager.CardManagerCardUpdateCallback() {
+            @Override
+            public void CardsUpdated(List<StampCard> newCards) {
+                String s = "";
+            }
+        });
     }
 }

@@ -19,8 +19,10 @@ public class Constants {
     public static final String GetStoresForCompanyURL = ServerURL + "/stampitprovider/{companyid}/stores";
     public static final String GetStoresForCompanyCountURL = ServerURL + "/stampitprovider/{companyid}/stores/count";
     public static final String GetBlobForIDURL = ServerURL + "/blob/{blobid}/content";
+    public static final String DeleteStampCardURL = ServerURL + "/me/stampcard/{cardid}";
 
     //HTTP Constants
+    public static final int HTTP_RESULT_DELETE_OK = 204;
     public static final int HTTP_RESULT_OK = 200;
     public static final int HTTP_RESULT_BAD_REQUEST = 400;
     public static final int HTTP_RESULT_NOT_AUTHORIZED = 401;

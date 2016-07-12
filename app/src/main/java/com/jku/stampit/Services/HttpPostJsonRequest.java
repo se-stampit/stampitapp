@@ -2,6 +2,8 @@ package com.jku.stampit.Services;
 
 import android.os.AsyncTask;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -60,19 +62,38 @@ public class HttpPostJsonRequest extends AsyncTask<String,Void,WebserviceReturnO
             connection.setDoOutput(true);
             connection.setDoInput(true);
 
-            //Connect
-            connection.connect();
-
-           OutputStream os = connection.getOutputStream();
+            OutputStream os = connection.getOutputStream();
             os.write(contentToSend.getBytes("UTF-8"));
             os.close();
 
-            // read the response
-            /*InputStream in = new BufferedInputStream(connection.getInputStream());*/
-            //result.setReturnString(org.apache.commons.io.IOUtils.toString(in, "UTF-8"));
+            connection.connect();
             result.setStatusCode(connection.getResponseCode());
-        } catch (Exception e) {
-            e.printStackTrace();
+            BufferedReader br;
+            if (200 <= connection.getResponseCode() && connection.getResponseCode() <= 299) {
+                br = new BufferedReader(new InputStreamReader((connection.getInputStream())));
+            } else {
+                br = new BufferedReader(new InputStreamReader((connection.getErrorStream())));
+            }
+            StringBuilder sb = new StringBuilder();
+            String output;
+            while ((output = br.readLine()) != null) {
+                sb.append(output);
+                result.setReturnString(sb.toString());
+            }
+            //Connect
+            //connection.connect();
+
+            // read the response
+            /*
+            InputStream in = connection.getInputStream();
+            String encoding = connection.getContentEncoding();
+            encoding = encoding == null ? "UTF-8" : encoding;
+            String body = IOUtils.toString(in, encoding);
+            */
+            //result.setReturnString(org.apache.commons.io.IOUtils.toString(in, "UTF-8"));
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
             // throw e;
         } finally {
             // close the reader; this can throw an exception too, so
