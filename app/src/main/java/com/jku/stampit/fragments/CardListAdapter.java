@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.jku.stampit.R;
+import com.jku.stampit.data.Company;
 import com.jku.stampit.data.StampCard;
 
 import java.util.ArrayList;
@@ -62,40 +63,6 @@ public class CardListAdapter extends ArrayAdapter<StampCard>  implements Filtera
             cardFilter = new CardFilter();
         }
         return cardFilter;
-        /*
-        return new Filter() {
-
-            @Override
-            protected FilterResults performFiltering(CharSequence constraint) {
-                final FilterResults oReturn = new FilterResults();
-                final ArrayList<StampCard> results = new ArrayList<StampCard>();
-                String constr = constraint.toString().toLowerCase();
-                if (constraint != null && constraint != "") {
-                    if (orig != null && orig.size() > 0) {
-                        for (final StampCard cd : orig) {
-                            if (cd.getProductName().toLowerCase()
-                                    .contains(constr))
-                                results.add(cd);
-                        }
-                    }
-                } else {
-                    if(orig != null)
-                        results.addAll(orig);
-                }
-                oReturn.values = results;
-                return oReturn;
-            }
-
-            @SuppressWarnings("unchecked")
-            @Override
-            protected void publishResults(CharSequence constraint,
-                                          FilterResults results) {
-                values.clear();
-                values.addAll((ArrayList<StampCard>) results.values);
-                notifyDataSetChanged();
-            }
-        };
-        */
     }
 
     @Override
@@ -128,6 +95,18 @@ public class CardListAdapter extends ArrayAdapter<StampCard>  implements Filtera
         if(card.getDeleteDate() != null) {
             cardOverlay.setImageResource(R.drawable.delete);
         }
+
+        ImageView img = (ImageView) convertView.findViewById(R.id.card_image);
+        if(img != null) {
+            Company comp = card.getCompany();
+            if(comp == null) {
+                comp = card.getCompany();
+            }
+            if(comp != null) {
+                img.setImageBitmap(comp.getImage());
+            }
+        }
+
         // Return the completed view to render on screen
         return convertView;
     }

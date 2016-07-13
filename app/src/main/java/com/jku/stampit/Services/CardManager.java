@@ -264,8 +264,13 @@ public class CardManager {
                     List<CardDTO> cards = mapper.readValue(result.getReturnString(),
                             TypeFactory.defaultInstance().constructCollectionType(List.class,
                                     CardDTO.class));
+
+                    List<StampCard> newCards = getStampCardList(cards);
+                    for(StampCard card: newCards) {
+                        card.setCompany(CardManager.getInstance().GetCompanyForID(card.getCompanyId()));
+                    }
                     mycards.clear();
-                    mycards.addAll(getStampCardList(cards));
+                    mycards.addAll(newCards);
                 } catch(IOException exception) {
                    String s = exception.getStackTrace().toString();
                 }

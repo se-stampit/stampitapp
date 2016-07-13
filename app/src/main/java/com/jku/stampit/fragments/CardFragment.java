@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.jku.stampit.R;
@@ -15,6 +16,7 @@ import com.jku.stampit.Services.CardManager;
 import com.jku.stampit.controls.StampView;
 import com.jku.stampit.data.Company;
 import com.jku.stampit.data.StampCard;
+import com.jku.stampit.data.Store;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -91,6 +93,16 @@ public class CardFragment extends Fragment  {
 
         View cardView = inflater.inflate(R.layout.fragment_card, container, false);
 
+        if(card != null) {
+            ImageView img = (ImageView) cardView.findViewById(R.id.card_image);
+            if(img != null) {
+                Company comp = card.getCompany();
+                if(comp != null) {
+                    img.setImageBitmap(comp.getImage());
+                }
+
+            }
+        }
         return cardView;
     }
 

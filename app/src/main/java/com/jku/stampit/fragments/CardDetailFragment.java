@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -106,6 +107,15 @@ public class CardDetailFragment extends Fragment {
         if(stmpView != null && card != null) {
             stmpView.setCircleCount(card.getRequiredStampCount());
             stmpView.setFilledCircleCount(card.getCurrentStampCount());
+        }
+        ImageView img = (ImageView) cardView.findViewById(R.id.card_image);
+        if(img != null) {
+            if(comp == null) {
+                comp = card.getCompany();
+            }
+            if(comp != null) {
+                img.setImageBitmap(comp.getImage());
+            }
         }
 
         return cardView;

@@ -79,7 +79,8 @@ public class LoginActivity extends FragmentActivity
 
     private GoogleApiClient buildGoogleApiClient() {
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken("229653082955-3mut736305gggd1f8b0nsitlhtsab8sg.apps.googleusercontent.com")
+                .requestIdToken(LoginActivity.this.getResources().getString(R.string.server_client_id))
+                //.requestServerAuthCode(LoginActivity.this.getResources().getString(R.string.server_client_id))
                 .requestEmail()
                 .build();
 
@@ -123,11 +124,11 @@ public class LoginActivity extends FragmentActivity
     private void handleSignInResult(GoogleSignInResult result) {
         Log.d("Login", "handleSignInResult:" + result.isSuccess() + " Status: " + result.getStatus());
         //Toast.makeText(this.getApplicationContext(),"handleSignInResult:" + result.isSuccess() + " Status: " + result.getStatus(),Toast.LENGTH_LONG).show();
-        boolean debug = false;
-        dialog = ProgressDialog.show(this, "", "registrieren und einloggen...", true);
-        if (result.isSuccess() || debug) {
+       dialog = ProgressDialog.show(this, "", "registrieren und einloggen...", true);
+        if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
             Log.i("LOGIN", "Google signed in succeccfully ");
+            Toast.makeText(getApplicationContext(),"Google Login successfully",Toast.LENGTH_LONG);
             GoogleSignInAccount acct = result.getSignInAccount();
             String token = acct.getIdToken();
             String[] splitted = acct.getDisplayName().split(" ");
@@ -160,6 +161,7 @@ public class LoginActivity extends FragmentActivity
             });
         } else {
             // Signed out, show unauthenticated UI.
+            Toast.makeText(getApplicationContext(),"statuscode: "+ result.getStatus().getStatusCode() + "\n message:" + result.getStatus().getStatusMessage(),Toast.LENGTH_LONG).show();
             updateUI(false);
         }
     }
@@ -178,7 +180,7 @@ public class LoginActivity extends FragmentActivity
             finishLogin();
         } else {
             findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
-            Toast.makeText(getApplicationContext(), "Login fehlgeschlagen", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "Login fehlgeschlagen", Toast.LENGTH_SHORT).show();
         }
     }
 
