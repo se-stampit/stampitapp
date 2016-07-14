@@ -80,7 +80,6 @@ public class LoginActivity extends FragmentActivity
     private GoogleApiClient buildGoogleApiClient() {
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(LoginActivity.this.getResources().getString(R.string.server_client_id))
-                //.requestServerAuthCode(LoginActivity.this.getResources().getString(R.string.server_client_id))
                 .requestEmail()
                 .build();
 
@@ -123,8 +122,7 @@ public class LoginActivity extends FragmentActivity
 
     private void handleSignInResult(GoogleSignInResult result) {
         Log.d("Login", "handleSignInResult:" + result.isSuccess() + " Status: " + result.getStatus());
-        //Toast.makeText(this.getApplicationContext(),"handleSignInResult:" + result.isSuccess() + " Status: " + result.getStatus(),Toast.LENGTH_LONG).show();
-       dialog = ProgressDialog.show(this, "", "registrieren und einloggen...", true);
+        dialog = ProgressDialog.show(this, "", "registrieren und einloggen...", true);
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
             Log.i("LOGIN", "Google signed in succeccfully ");
@@ -148,20 +146,21 @@ public class LoginActivity extends FragmentActivity
                     //User already registered, Login instead
                     //Toast.makeText(StampItApplication.getContext(),"token:" + UserManager.getInstance().getSessionToken(),Toast.LENGTH_LONG).show();
                     if(result.getStatusCode() == 400){
+                        Toast.makeText(getApplicationContext(),"Stampit-Server Login Error: statuscode: "+ result.getStatusCode() + "\n message:" + result.getReturnString(),Toast.LENGTH_LONG).show();
                         //Already registered, sign in
                         updateUI(false);
                     } else if(result.getStatusCode() == 200) {
                         //registered
                         updateUI(true);
                     } else {
-                        //
+                        Toast.makeText(getApplicationContext(),"Stampit-Server Login Error: statuscode: "+ result.getStatusCode() + "\n message:" + result.getReturnString(),Toast.LENGTH_LONG).show();
                         updateUI(false);
                     }
                 }
             });
         } else {
             // Signed out, show unauthenticated UI.
-            Toast.makeText(getApplicationContext(),"statuscode: "+ result.getStatus().getStatusCode() + "\n message:" + result.getStatus().getStatusMessage(),Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(),"Google Login Error : statuscode: "+ result.getStatus().getStatusCode() + "\n message:" + result.getStatus().getStatusMessage(),Toast.LENGTH_LONG).show();
             updateUI(false);
         }
     }

@@ -6,7 +6,7 @@ android {
         release {
             keyAlias 'stampit'
             keyPassword 'stampit'
-            storeFile file('/Users/user/Documents/Projekte/Uni/SoftwareEngineeringPR/AndroidApp/app/stampit.jks')
+            storeFile file('/Users/user/Documents/Projekte/Uni/SoftwareEngineeringPR/App/app/stampit.jks')
             storePassword 'stampit'
         }
     }
