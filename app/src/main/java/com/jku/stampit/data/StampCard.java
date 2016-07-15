@@ -68,18 +68,6 @@ public class StampCard implements Parcelable {
         this.maxDuration = maxDuration;
         this.bonusDescription = bonusDescription;
     }
-    public Boolean isInvalid() {
-        return false;
-        /*
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(createdAt);
-        cal.add(Calendar.DATE, maxDuration);
-        if(new Date().after((Date)cal.getTime())){
-            return true;
-        }
-        return false;
-        */
-    }
 
     // Parcelling part
     public StampCard(Parcel in){
